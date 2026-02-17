@@ -1,0 +1,54 @@
+import { NextResponse } from "next/server";
+import { UpdateUserInput, UpdateUserSchema } from "@/api/validators/user";
+import UserService from "@/api/services/UserService";
+import { PublicUser } from "@/api/types/IUser";
+import AuditService from "@/api/services/AuditService";
+import { requireAuth } from "@/api/middleware/requireAuth";
+
+export const PATCH = requireAuth(async (req) => {
+  const userService = new UserService();
+  const auditService = new AuditService();
+
+  const reqBody = await req.json();
+  const validatedData = UpdateUserSchema.safeParse(reqBody);
+  if (!validatedData.success) {
+    return NextResponse.json(
+      { error: "Invalid request data" },
+      { status: 400 },
+    );
+  }
+
+  const validatedUserData = validatedData.data;
+
+  const userData = req.user;
+
+  const updateData: UpdateUserInput = {} as UpdateUserInput;
+
+  if (validatedUserData.firstname) {
+    updateData.firstname = validatedUserData.firstname;
+  }
+
+  if (validatedUserData.lastname) {
+    updateData.lastname = validatedUserData.lastname;
+  }
+
+  const user = await userService.updateUser({
+    where: { id: userData.id },
+    data: updateData,
+  });
+
+  const me: PublicUser = await userService.serializeUser(user);
+
+  await auditService.audit({
+    action: "USER_UPDATED",
+    userId: user.id,
+    metadata: updateData,
+  });
+  return NextResponse.json(
+    {
+      success: true,
+      data: me,
+    },
+    { status: 200 },
+  );
+});

@@ -33,5 +33,8 @@
         "organizeImports": "on"
       }
     }
+  },
+  "organizeImports": {
+    "enabled": true
   }
 }

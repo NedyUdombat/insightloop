@@ -1,0 +1,309 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String   @id @default(uuid(7))
+  firstname      String
+  lastname       String
+  email          String   @unique
+  password       String
+  role           UserRole @default(USER)
+  bannedReason   String?
+  emailVerified  Boolean? @default(false)
+  previousHashes String[]
+  loginFails     Int?
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  emailVerifiedAt DateTime?
+  accountLock     DateTime?
+  bannedAt        DateTime?
+  lastAccessed    DateTime?
+
+  projects  Project[]
+  features  Feature[]
+  events    Event[]
+  feedbacks Feedback[]
+  sessions  Session[]
+  auditLogs AuditLog[]
+  tokens    Token[]
+  apiKeys   ApiKey[]
+
+  // Indexes
+  @@index([id])
+  @@index([email])
+  // Map
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model Project {
+  id   String @id @default(uuid(7))
+  name String
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdById String
+  features    Feature[]
+  events      Event[]
+  endUsers    EndUser[]
+  feedbacks   Feedback[]
+
+  ownerId String
+  owner   User     @relation(fields: [ownerId], references: [id])
+  apiKeys ApiKey[]
+
+  // Indexes
+  @@index([createdById])
+  @@index([deletedAt])
+  // Map
+  @@map("projects")
+}
+
+model Feature {
+  id   String @id @default(uuid(7))
+  name String
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+
+  // Indexes
+  @@index([createdById])
+  @@index([projectId])
+  @@index([deletedAt])
+  // Map
+  @@map("features")
+}
+
+model Event {
+  id             String   @id @default(uuid(7))
+  eventName      String
+  eventTimestamp DateTime
+  properties     Json
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+
+  endUser   EndUser @relation(fields: [endUserId], references: [id])
+  endUserId String
+
+  // Indexes
+  @@index([projectId, eventName])
+  @@index([projectId, eventTimestamp])
+  @@index([endUserId, eventTimestamp])
+  @@index([projectId])
+  // Map
+  @@map("events")
+}
+
+model EndUser {
+  id             String  @id @default(uuid(7))
+  name           String
+  email          String
+  externalUserId String?
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+
+  events    Event[]
+  feedbacks Feedback[]
+
+  @@unique([projectId, externalUserId], name: "project_external_user_unique")
+  // Indexes
+  @@index([email])
+  @@index([projectId])
+  // Map
+  @@map("end_users")
+}
+
+model Feedback {
+  id       String         @id @default(uuid(7))
+  message  String
+  status   FeedbackStatus @default(NEW)
+  metadata Json
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdById String?
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+
+  endUser   EndUser @relation(fields: [endUserId], references: [id])
+  endUserId String
+  user      User?   @relation(fields: [userId], references: [id])
+  userId    String?
+
+  // Indexes
+  @@index([endUserId])
+  @@index([projectId])
+  @@index([projectId, createdAt])
+  @@index([deletedAt])
+  // Map
+  @@map("feedbacks")
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model Session {
+  id     String @id @default(uuid(7))
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Timestamps
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  revokedAt    DateTime?
+  expiresAt    DateTime
+  maxExpiresAt DateTime
+
+  userAgent String?
+  ip        String?
+  sessionId String? @unique
+  csrfToken String? @unique
+
+  // Indexes
+  @@index([userId])
+  // Map
+  @@map("sessions")
+}
+
+model AuditLog {
+  id     String @id @default(uuid(7))
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  action    String
+  userAgent String?
+  ip        String?
+  metadata  Json?
+
+  // Indexes
+  @@index([userId])
+  // Map
+  @@map("auditlogs")
+}
+
+model RateLimitLog {
+  id         String @unique @default(uuid(7))
+  key        String
+  identifier String
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Indexes
+  @@index([key, identifier, createdAt])
+  // Map
+  @@map("ratelimitlog")
+}
+
+model Token {
+  id        String    @unique @default(uuid(7))
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  type      TokenType
+  tokenHash String
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  @@unique([tokenHash, type])
+  // Indexes
+  @@index([userId, type])
+  @@index([tokenHash])
+  // Map
+  @@map("tokens")
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model ApiKey {
+  id      String @unique @default(uuid(7))
+  name    String
+  keyHash String
+
+  // Timestamps
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  @@unique([keyHash])
+  // Indexes
+  @@index([projectId])
+  // Map
+  @@map("apikeys")
+}
