@@ -34,7 +34,9 @@
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double"
+    }
   }
 }

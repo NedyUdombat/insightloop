@@ -7,6 +7,12 @@ CREATE TYPE "FeedbackStatus" AS ENUM ('NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'
 -- CreateEnum
 CREATE TYPE "TokenType" AS ENUM ('EMAIL_VERIFICATION', 'PASSWORD_RESET');
 
+-- CreateEnum
+CREATE TYPE "ApiKeyType" AS ENUM ('INGESTION', 'MANAGEMENT');
+
+-- CreateEnum
+CREATE TYPE "Environment" AS ENUM ('DEVELOPMENT', 'PRODUCTION');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -19,6 +25,7 @@ CREATE TABLE "users" (
     "emailVerified" BOOLEAN DEFAULT false,
     "previousHashes" TEXT[],
     "loginFails" INTEGER,
+    "lastProjectId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -37,7 +44,6 @@ CREATE TABLE "projects" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
-    "createdById" TEXT NOT NULL,
     "ownerId" TEXT NOT NULL,
 
     CONSTRAINT "projects_pkey" PRIMARY KEY ("id")
@@ -62,6 +68,7 @@ CREATE TABLE "events" (
     "eventName" TEXT NOT NULL,
     "eventTimestamp" TIMESTAMP(3) NOT NULL,
     "properties" JSONB NOT NULL,
+    "environment" "Environment" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -143,7 +150,9 @@ CREATE TABLE "ratelimitlog" (
     "identifier" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3)
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "ratelimitlog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -156,21 +165,30 @@ CREATE TABLE "tokens" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
     "expiresAt" TIMESTAMP(3) NOT NULL,
-    "usedAt" TIMESTAMP(3)
+    "usedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tokens_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "apikeys" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "keyValue" TEXT,
     "keyHash" TEXT NOT NULL,
+    "keyHint" TEXT NOT NULL,
+    "type" "ApiKeyType" NOT NULL DEFAULT 'INGESTION',
+    "environment" "Environment" NOT NULL DEFAULT 'DEVELOPMENT',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
     "revokedAt" TIMESTAMP(3),
     "lastUsedAt" TIMESTAMP(3),
+    "rotatedAt" TIMESTAMP(3),
     "projectId" TEXT NOT NULL,
-    "createdById" TEXT NOT NULL
+    "createdById" TEXT NOT NULL,
+
+    CONSTRAINT "apikeys_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -183,10 +201,22 @@ CREATE INDEX "users_id_idx" ON "users"("id");
 CREATE INDEX "users_email_idx" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "projects_createdById_idx" ON "projects"("createdById");
+CREATE INDEX "projects_id_ownerId_idx" ON "projects"("id", "ownerId");
+
+-- CreateIndex
+CREATE INDEX "projects_ownerId_name_idx" ON "projects"("ownerId", "name");
+
+-- CreateIndex
+CREATE INDEX "projects_ownerId_idx" ON "projects"("ownerId");
 
 -- CreateIndex
 CREATE INDEX "projects_deletedAt_idx" ON "projects"("deletedAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "projects_ownerId_name_key" ON "projects"("ownerId", "name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "projects_id_ownerId_deletedAt_key" ON "projects"("id", "ownerId", "deletedAt");
 
 -- CreateIndex
 CREATE INDEX "features_createdById_idx" ON "features"("createdById");
@@ -243,13 +273,7 @@ CREATE INDEX "sessions_userId_idx" ON "sessions"("userId");
 CREATE INDEX "auditlogs_userId_idx" ON "auditlogs"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ratelimitlog_id_key" ON "ratelimitlog"("id");
-
--- CreateIndex
 CREATE INDEX "ratelimitlog_key_identifier_createdAt_idx" ON "ratelimitlog"("key", "identifier", "createdAt");
-
--- CreateIndex
-CREATE UNIQUE INDEX "tokens_id_key" ON "tokens"("id");
 
 -- CreateIndex
 CREATE INDEX "tokens_userId_type_idx" ON "tokens"("userId", "type");
@@ -261,10 +285,16 @@ CREATE INDEX "tokens_tokenHash_idx" ON "tokens"("tokenHash");
 CREATE UNIQUE INDEX "tokens_tokenHash_type_key" ON "tokens"("tokenHash", "type");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "apikeys_id_key" ON "apikeys"("id");
+CREATE INDEX "apikeys_projectId_idx" ON "apikeys"("projectId");
 
 -- CreateIndex
-CREATE INDEX "apikeys_projectId_idx" ON "apikeys"("projectId");
+CREATE INDEX "apikeys_projectId_deletedAt_idx" ON "apikeys"("projectId", "deletedAt");
+
+-- CreateIndex
+CREATE INDEX "apikeys_keyHash_deletedAt_idx" ON "apikeys"("keyHash", "deletedAt");
+
+-- CreateIndex
+CREATE INDEX "apikeys_keyHash_deletedAt_revokedAt_environment_idx" ON "apikeys"("keyHash", "deletedAt", "revokedAt", "environment");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "apikeys_keyHash_key" ON "apikeys"("keyHash");

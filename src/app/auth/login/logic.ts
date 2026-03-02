@@ -42,11 +42,29 @@ const useLoginAccount = () => {
       { email, password },
       {
         onSuccess: (data) => {
-          if (data.data.emailVerified) {
-            router.push("/dashboard");
-          } else {
+          const user = data.data;
+
+          // Check email verification first
+          if (!user.emailVerified) {
             router.push("/auth/verify-email/error?reason=email_not_verified");
+            return;
           }
+
+          // Determine navigation based on project state
+          if (user.projects?.length === 0) {
+            router.push("/onboarding/create-project");
+            return;
+          }
+
+          // Navigate to last used project or first available
+          router.push(
+            `/dashboard/${user.lastProjectId ?? user.projects?.[0]?.id}`,
+          );
+        },
+        onError: (error) => {
+          // Add error handling
+          console.error("Login failed:", error);
+          // Optionally: setError("Failed to login. Please try again.");
         },
       },
     );

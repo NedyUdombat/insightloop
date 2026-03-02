@@ -1,16 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
 import AuthService from "@/api/services/AuthService";
+import { type NextRequest, NextResponse } from "next/server";
 
 export type AuthenticatedRequest = NextRequest & {
   user: {
     id: string;
     email: string;
     role: string;
+    emailVerified: boolean | null;
   };
   session: {
     id: string;
   };
-  params: Record<string, string>;
+  params?: Record<string, string>;
 };
 
 type RouteContext = {
@@ -18,7 +19,7 @@ type RouteContext = {
 };
 
 export function requireAuth<
-  T extends (req: AuthenticatedRequest, ctx: RouteContext) => Promise<Response>,
+  T extends (req: AuthenticatedRequest) => Promise<Response>,
 >(handler: T) {
   return async (req: NextRequest, ctx: RouteContext) => {
     try {
@@ -39,17 +40,15 @@ export function requireAuth<
         id: user.id,
         email: user.email,
         role: user.role,
+        emailVerified: user.emailVerified,
       };
       (req as AuthenticatedRequest).session = {
         id: session.id,
       };
 
-      // 🔑 normalize params
-      if (ctx?.params instanceof Promise) {
-        (req as AuthenticatedRequest).params = await ctx.params;
-      }
+      (req as AuthenticatedRequest).params = await ctx.params;
 
-      return handler(req as AuthenticatedRequest, ctx);
+      return handler(req as AuthenticatedRequest);
     } catch (err) {
       console.error("Auth middleware failed", err);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -45,7 +45,6 @@ class AuthService {
         id: sessionId,
       },
     });
-
   }
 
   async destroyAllSessions(userId: string) {
@@ -54,7 +53,6 @@ class AuthService {
         userId,
       },
     });
-
   }
 
   async loadSession(sessionId: string) {

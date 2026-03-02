@@ -1,8 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
+import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import { logout } from "./call";
 
 const useLogout = () => {
-  const { isPending, isError, error, mutate } = useMutation<
+  const {
+    isPending,
+    isError,
+    error,
+    mutate,
+  }: UseMutationResult<GenericResponse<[]>, Error, void> = useMutation<
     GenericResponse<[]>,
     Error,
     void

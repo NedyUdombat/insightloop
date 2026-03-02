@@ -12,6 +12,9 @@ export const ResetPasswordSchema = z.strictObject({
     .regex(/[a-z]/, "Password must include a lowercase letter")
     .regex(/[A-Z]/, "Password must include an uppercase letter")
     .regex(/[0-9]/, "Password must include a number")
-    .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, "Password must include a special character")
+    .regex(
+      /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
+      "Password must include a special character",
+    )
     .trim(),
 });

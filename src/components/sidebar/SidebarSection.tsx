@@ -26,7 +26,9 @@ export function SidebarSection({
             <Icon size={18} />
             {!collapsed && <span>{label}</span>}
           </div>
-          {!collapsed && <MoreHorizontal size={16} />}
+          {!collapsed && (
+            <MoreHorizontal size={16} className="cursor-pointer" />
+          )}
         </button>
       </Popover.Trigger>
 

@@ -1,6 +1,6 @@
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import { verifyEmail } from "./call";
-import { type VerifyEmailResponse } from "./types";
+import type { VerifyEmailResponse } from "./types";
 
 const useVerifyEmail = () => {
   const {

@@ -29,6 +29,35 @@ class EventService {
       },
     });
   }
+
+  async countEvents({
+    projectId,
+    startDate,
+    endDate,
+  }: {
+    projectId: string;
+    startDate?: Date;
+    endDate?: Date;
+  }) {
+    const whereClause: any = {
+      projectId,
+    };
+
+    if (startDate) {
+      whereClause.eventTimeStamp = { gte: startDate };
+    }
+
+    if (endDate) {
+      whereClause.eventTimeStamp = {
+        ...whereClause.eventTimeStamp,
+        lte: endDate,
+      };
+    }
+
+    return prisma.event.count({
+      where: whereClause,
+    });
+  }
 }
 
 export default EventService;

@@ -1,5 +1,4 @@
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
-import type { PublicUser } from "@/api/types/IUser";
 import { register } from "./call";
 import type { RegisterPayload } from "./types";
 

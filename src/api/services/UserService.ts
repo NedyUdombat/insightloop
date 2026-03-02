@@ -1,7 +1,10 @@
 import { prisma } from "@/api/lib/db";
-import { IUser, PublicUser } from "@/api/types/IUser";
-import { CreateUserInput } from "@/api/validators/user";
-import { UserWhereUniqueInput } from "@/generated/prisma/models/User";
+import type { IUser, PublicUser } from "@/api/types/IUser";
+import type { CreateUserInput } from "@/api/validators/user";
+import type {
+  UserInclude,
+  UserWhereUniqueInput,
+} from "@/generated/prisma/models/User";
 
 class UserService {
   async createUser(data: CreateUserInput): Promise<IUser> {
@@ -16,9 +19,16 @@ class UserService {
     });
   }
 
-  async fetchUserByEmail(email: string): Promise<IUser | null> {
+  async fetchUserByEmail({
+    email,
+    include,
+  }: {
+    email: string;
+    include?: UserInclude;
+  }): Promise<IUser | null> {
     return prisma.user.findUnique({
       where: { email, deletedAt: null },
+      include: include,
     });
   }
 
@@ -32,6 +42,7 @@ class UserService {
       emailVerified: user.emailVerified,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      projects: user.projects || [],
     } as PublicUser;
   }
 

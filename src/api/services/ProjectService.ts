@@ -1,21 +1,23 @@
 import { prisma } from "@/api/lib/db";
-import { PrismaClient } from "@prisma/client/extension";
-import {
+import type { Prisma } from "@/generated/prisma/browser";
+import type {
+  ProjectInclude,
   ProjectOrderByWithRelationInput,
   ProjectWhereInput,
-  ProjectWhereUniqueInput,
 } from "@/generated/prisma/models/Project";
+import type { PrismaClient } from "@prisma/client/extension";
+import type { IProject, PublicProject } from "../types/IProject";
+
+const MAX_PROJECTS_PER_USER = 5;
 
 class ProjectService {
   async createProject({
     name,
     ownerId,
-    createdById,
     tx,
   }: {
     name: string;
     ownerId: string;
-    createdById: string;
     tx?: PrismaClient;
   }) {
     const db = tx ?? prisma;
@@ -23,7 +25,6 @@ class ProjectService {
       data: {
         name,
         ownerId,
-        createdById,
       },
     });
   }
@@ -33,6 +34,7 @@ class ProjectService {
     take,
     skip,
     orderBy,
+    select,
     tx,
   }: {
     where: ProjectWhereInput;
@@ -43,6 +45,7 @@ class ProjectService {
       | ProjectOrderByWithRelationInput[]
       | undefined;
     tx?: PrismaClient;
+    select?: Prisma.ProjectSelect;
   }) {
     const db = tx ?? prisma;
     return db.project.findMany({
@@ -50,6 +53,7 @@ class ProjectService {
       take,
       skip,
       orderBy,
+      select,
     });
   }
 
@@ -66,17 +70,20 @@ class ProjectService {
     });
   }
 
-  async findProjectById({
+  async findProject({
     where,
     tx,
+    include,
   }: {
     where: ProjectWhereInput;
     tx?: PrismaClient;
+    include?: ProjectInclude;
   }) {
     const db = tx ?? prisma;
 
     return db.project.findFirst({
       where,
+      include,
     });
   }
 
@@ -85,8 +92,8 @@ class ProjectService {
     data,
     tx,
   }: {
-    where: ProjectWhereUniqueInput;
-    data: any;
+    where: ProjectWhereInput;
+    data: Prisma.ProjectUpdateInput;
     tx?: PrismaClient;
   }) {
     const db = tx ?? prisma;
@@ -96,10 +103,18 @@ class ProjectService {
     });
   }
 
-  async deleteProject({ id, tx }: { id: string; tx?: PrismaClient }) {
+  async deleteProject({
+    id,
+    ownerId,
+    tx,
+  }: {
+    id: string;
+    ownerId: string;
+    tx?: PrismaClient;
+  }) {
     const db = tx ?? prisma;
-    return db.user.update({
-      where: { id },
+    return db.project.update({
+      where: { id, ownerId },
       data: {
         deletedAt: new Date(),
       },
@@ -117,13 +132,52 @@ class ProjectService {
   }) {
     const db = tx ?? prisma;
 
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, ownerId: userId, deletedAt: null },
+    const project = await db.project.findFirst({
+      where: {
+        // id_ownerId_deletedAt: {
+        id: projectId,
+        ownerId: userId,
+        deletedAt: null,
+        // },
+      },
     });
 
-    if (!project) throw new Error("Forbidden.");
+    if (!project) {
+      const error: any = new Error("Project not found");
+      error.statusCode = 404;
+      throw error;
+    }
 
     return project;
+  }
+
+  async canCreateProject({
+    userId,
+    tx,
+  }: {
+    userId: string;
+    tx?: PrismaClient;
+  }) {
+    const db = tx ?? prisma;
+
+    const count = await db.project.count({
+      where: { ownerId: userId, deletedAt: null },
+    });
+
+    if (count >= MAX_PROJECTS_PER_USER) {
+      throw new Error("PROJECT_LIMIT_REACHED");
+    }
+  }
+
+  async serializeProject(project: IProject): Promise<PublicProject> {
+    return {
+      id: project.id,
+      name: project.name,
+      ownerId: project.ownerId,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt,
+      apiKeys: project.apiKeys,
+    } as PublicProject;
   }
 }
 

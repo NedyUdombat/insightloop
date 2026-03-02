@@ -1,13 +1,44 @@
-import StateA from "./states/StateA";
-import StateB from "./states/StateB";
-import StateC from "./states/StateC";
+// app/dashboard/page.tsx
 
-// TEMP — replace with real data
-const hasProject = false;
-const hasEvents = false;
+import AuthService from "@/api/services/AuthService";
+import ProjectService from "@/api/services/ProjectService";
+import UserService from "@/api/services/UserService";
+import { redirect } from "next/navigation";
 
-export default function DashboardPage() {
-  if (!hasProject) return <StateA />;
-  if (hasProject && !hasEvents) return <StateB />;
-  return <StateC />;
+export default async function DashboardRoot() {
+  const authService = new AuthService();
+  const userService = new UserService();
+  const projectService = new ProjectService();
+
+  const session = await authService.getSession();
+
+  if (!session) {
+    redirect("/auth/login");
+  }
+
+  const user = await userService.fetchUserById({ id: session.user.id });
+
+  if (!user) {
+    redirect("/auth/login");
+  }
+
+  const projects = await projectService.findProjects({
+    where: {
+      ownerId: user.id,
+      deletedAt: null,
+    },
+    take: 10,
+    skip: 0,
+    orderBy: { createdAt: "asc" },
+  });
+
+  // 🟢 No projects → onboarding
+  if (!projects.length) {
+    redirect("/onboarding/create-project");
+  }
+
+  // 🟢 Has projects → redirect to last used or first
+  const targetProjectId = user.lastProjectId ?? projects[0].id;
+
+  redirect(`/dashboard/${targetProjectId}`);
 }

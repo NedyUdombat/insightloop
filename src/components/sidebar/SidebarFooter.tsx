@@ -41,18 +41,18 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
       <div className="mx-4 my-3 h-px bg-neutral-800" />
 
       <SidebarSection icon={Book} label="Resources" collapsed={collapsed}>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3">
+        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
           <Rocket size={18} />
           Get started
         </a>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3">
+        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
           <BookOpen size={18} />
           API docs
         </a>
       </SidebarSection>
 
       <SidebarSection icon={Settings} label="Settings" collapsed={collapsed}>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3">
+        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
           <User size={18} />
           Profile
         </a>
@@ -60,7 +60,7 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           <CreditCard size={18} />
           Billing
         </span>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3">
+        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
           <Bell size={18} />
           Notification preferences
         </a>

@@ -1,10 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
-import { SidebarHeader } from "./SidebarHeader";
-import { ProjectSwitcher } from "./ProjectSwitcher";
-import { SidebarNav } from "./SidebarNav";
+import useSidebarLogic from "./logic";
 import { SidebarFooter } from "./SidebarFooter";
+import { SidebarHeader } from "./SidebarHeader";
+import { SidebarNav } from "./SidebarNav";
+
+const ProjectSwitcher = dynamic(() => import("./ProjectSwitcher"), {
+  ssr: false,
+});
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -12,6 +17,8 @@ export default function Sidebar() {
   // fake app state
   const hasProject = false;
   const hasEvents = false;
+
+  const { projects, isPending, isError, error } = useSidebarLogic();
 
   return (
     <aside
@@ -31,7 +38,7 @@ export default function Sidebar() {
         onToggle={() => setCollapsed((v) => !v)}
       />
 
-      <ProjectSwitcher collapsed={collapsed} />
+      <ProjectSwitcher collapsed={collapsed} projects={projects} />
 
       <SidebarNav
         collapsed={collapsed}

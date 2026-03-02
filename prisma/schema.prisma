@@ -24,6 +24,7 @@ model User {
   emailVerified  Boolean? @default(false)
   previousHashes String[]
   loginFails     Int?
+  lastProjectId  String?
 
   // Timestamps
   createdAt       DateTime  @default(now())
@@ -64,18 +65,22 @@ model Project {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  createdById String
-  features    Feature[]
-  events      Event[]
-  endUsers    EndUser[]
-  feedbacks   Feedback[]
+  features  Feature[]
+  events    Event[]
+  endUsers  EndUser[]
+  feedbacks Feedback[]
+  apiKeys   ApiKey[]
 
   ownerId String
-  owner   User     @relation(fields: [ownerId], references: [id])
-  apiKeys ApiKey[]
+  owner   User   @relation(fields: [ownerId], references: [id])
 
+  // Unique
+  @@unique([ownerId, name])
+  @@unique([id, ownerId, deletedAt])
   // Indexes
-  @@index([createdById])
+  @@index([id, ownerId])
+  @@index([ownerId, name])
+  @@index([ownerId])
   @@index([deletedAt])
   // Map
   @@map("projects")
@@ -105,10 +110,11 @@ model Feature {
 }
 
 model Event {
-  id             String   @id @default(uuid(7))
+  id             String      @id @default(uuid(7))
   eventName      String
   eventTimestamp DateTime
   properties     Json
+  environment    Environment
 
   // Timestamps
   createdAt DateTime  @default(now())
@@ -241,7 +247,7 @@ model AuditLog {
 }
 
 model RateLimitLog {
-  id         String @unique @default(uuid(7))
+  id         String @id @default(uuid(7))
   key        String
   identifier String
 
@@ -257,7 +263,7 @@ model RateLimitLog {
 }
 
 model Token {
-  id        String    @unique @default(uuid(7))
+  id        String    @id @default(uuid(7))
   userId    String
   user      User      @relation(fields: [userId], references: [id])
   type      TokenType
@@ -284,9 +290,13 @@ enum TokenType {
 }
 
 model ApiKey {
-  id      String @unique @default(uuid(7))
-  name    String
-  keyHash String
+  id          String      @id @default(uuid(7))
+  name        String
+  keyValue    String?
+  keyHash     String
+  keyHint     String
+  type        ApiKeyType  @default(INGESTION)
+  environment Environment @default(DEVELOPMENT)
 
   // Timestamps
   createdAt  DateTime  @default(now())
@@ -294,6 +304,7 @@ model ApiKey {
   deletedAt  DateTime?
   revokedAt  DateTime?
   lastUsedAt DateTime?
+  rotatedAt  DateTime?
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id])
@@ -304,6 +315,19 @@ model ApiKey {
   @@unique([keyHash])
   // Indexes
   @@index([projectId])
+  @@index([projectId, deletedAt])
+  @@index([keyHash, deletedAt])
+  @@index([keyHash, deletedAt, revokedAt, environment])
   // Map
   @@map("apikeys")
+}
+
+enum ApiKeyType {
+  INGESTION // Public: Used in JS SDK, can only send events
+  MANAGEMENT // Private: Used in backend, can read/delete data
+}
+
+enum Environment {
+  DEVELOPMENT
+  PRODUCTION
 }

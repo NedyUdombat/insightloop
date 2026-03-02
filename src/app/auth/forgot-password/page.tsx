@@ -52,9 +52,7 @@ export default function ForgotPasswordPage() {
                 }`}
               />
               {fieldErrors.email && (
-                <p className="mt-1 text-xs text-red-500">
-                  {fieldErrors.email}
-                </p>
+                <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>
               )}
             </div>
 

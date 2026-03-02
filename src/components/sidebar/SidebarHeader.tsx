@@ -9,7 +9,9 @@ export function SidebarHeader({
   onToggle: () => void;
 }) {
   return (
-    <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}  px-4 py-3`}>
+    <div
+      className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} px-4 py-3 cursor-pointer`}
+    >
       {!collapsed && (
         <span className="text-sm font-semibold text-neutral-100">
           InsightLoop
@@ -17,7 +19,7 @@ export function SidebarHeader({
       )}
       <button
         onClick={onToggle}
-        className="text-neutral-400 hover:text-neutral-200"
+        className="text-neutral-400 hover:text-neutral-200 cursor-pointer"
       >
         <Tooltip content={collapsed ? "expand" : "collapse"}>
           <PanelLeft size={18} />

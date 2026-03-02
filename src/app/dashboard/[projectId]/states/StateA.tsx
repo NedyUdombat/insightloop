@@ -1,4 +1,8 @@
+"use client";
+import { useRouter } from "next/navigation";
+
 export default function StateA() {
+  const router = useRouter();
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-semibold">Welcome to InsightLoop</h1>
@@ -14,7 +18,13 @@ export default function StateA() {
           immediately after creating one.
         </p>
 
-        <button className="mt-6 inline-flex rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-200">
+        <button
+          type="button"
+          className="mt-6 inline-flex rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-neutral-200 cursor-pointer"
+          onClick={() => {
+            router.push("/onboarding/create-project");
+          }}
+        >
           Create project
         </button>
 

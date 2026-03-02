@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import UserService from "@/api/services/UserService";
-import AuditService from "@/api/services/AuditService";
-import TokenService from "@/api/services/TokenService";
-import RateLimitService from "@/api/services/RateLimitService";
-import { EmailOnlySchema } from "@/api/validators/auth";
 import { getClientIp } from "@/api/lib/client";
+import AuditService from "@/api/services/AuditService";
 import EmailService from "@/api/services/EmailService";
+import RateLimitService from "@/api/services/RateLimitService";
+import TokenService from "@/api/services/TokenService";
+import UserService from "@/api/services/UserService";
+import { EmailOnlySchema } from "@/api/validators/auth";
+import { type NextRequest, NextResponse } from "next/server";
 
 const GENERIC_RESPONSE = {
   success: true,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const user = await userService.fetchUserByEmail(normalizedEmail);
+    const user = await userService.fetchUserByEmail({ email: normalizedEmail });
     if (!user || user.emailVerified === false || user.deletedAt) {
       return NextResponse.json(GENERIC_RESPONSE, { status: 200 });
     }
