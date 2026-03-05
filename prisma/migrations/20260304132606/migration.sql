@@ -11,7 +11,7 @@ CREATE TYPE "TokenType" AS ENUM ('EMAIL_VERIFICATION', 'PASSWORD_RESET');
 CREATE TYPE "ApiKeyType" AS ENUM ('INGESTION', 'MANAGEMENT');
 
 -- CreateEnum
-CREATE TYPE "Environment" AS ENUM ('DEVELOPMENT', 'PRODUCTION');
+CREATE TYPE "Environment" AS ENUM ('DEVELOPMENT', 'STAGING', 'PRODUCTION');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -41,6 +41,12 @@ CREATE TABLE "users" (
 CREATE TABLE "projects" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "emailNotifications" BOOLEAN NOT NULL DEFAULT true,
+    "eventAlerts" BOOLEAN NOT NULL DEFAULT true,
+    "weeklyReports" BOOLEAN NOT NULL DEFAULT false,
+    "autoArchive" BOOLEAN NOT NULL DEFAULT false,
+    "retentionDays" INTEGER NOT NULL DEFAULT 30,
+    "defaultEnvironment" "Environment" NOT NULL DEFAULT 'DEVELOPMENT',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -66,13 +72,13 @@ CREATE TABLE "features" (
 CREATE TABLE "events" (
     "id" TEXT NOT NULL,
     "eventName" TEXT NOT NULL,
-    "eventTimestamp" TIMESTAMP(3) NOT NULL,
     "properties" JSONB NOT NULL,
+    "metadata" JSONB NOT NULL,
     "environment" "Environment" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
-    "createdById" TEXT NOT NULL,
+    "eventTimestamp" TIMESTAMP(3) NOT NULL,
     "projectId" TEXT NOT NULL,
     "endUserId" TEXT NOT NULL,
 
@@ -96,16 +102,21 @@ CREATE TABLE "end_users" (
 -- CreateTable
 CREATE TABLE "feedbacks" (
     "id" TEXT NOT NULL,
+    "rating" INTEGER,
+    "title" TEXT,
     "message" TEXT NOT NULL,
+    "additionalInfo" TEXT,
     "status" "FeedbackStatus" NOT NULL DEFAULT 'NEW',
+    "properties" JSONB NOT NULL,
     "metadata" JSONB NOT NULL,
+    "environment" "Environment" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
+    "feedbackTimestamp" TIMESTAMP(3) NOT NULL,
     "createdById" TEXT,
     "projectId" TEXT NOT NULL,
     "endUserId" TEXT NOT NULL,
-    "userId" TEXT,
 
     CONSTRAINT "feedbacks_pkey" PRIMARY KEY ("id")
 );
@@ -213,7 +224,7 @@ CREATE INDEX "projects_ownerId_idx" ON "projects"("ownerId");
 CREATE INDEX "projects_deletedAt_idx" ON "projects"("deletedAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "projects_ownerId_name_key" ON "projects"("ownerId", "name");
+CREATE UNIQUE INDEX "projects_ownerId_name_deletedAt_key" ON "projects"("ownerId", "name", "deletedAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "projects_id_ownerId_deletedAt_key" ON "projects"("id", "ownerId", "deletedAt");
@@ -259,6 +270,12 @@ CREATE INDEX "feedbacks_projectId_createdAt_idx" ON "feedbacks"("projectId", "cr
 
 -- CreateIndex
 CREATE INDEX "feedbacks_deletedAt_idx" ON "feedbacks"("deletedAt");
+
+-- CreateIndex
+CREATE INDEX "feedbacks_projectId_rating_idx" ON "feedbacks"("projectId", "rating");
+
+-- CreateIndex
+CREATE INDEX "feedbacks_projectId_environment_idx" ON "feedbacks"("projectId", "environment");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "sessions_sessionId_key" ON "sessions"("sessionId");
@@ -309,9 +326,6 @@ ALTER TABLE "features" ADD CONSTRAINT "features_createdById_fkey" FOREIGN KEY ("
 ALTER TABLE "features" ADD CONSTRAINT "features_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "events" ADD CONSTRAINT "events_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -325,9 +339,6 @@ ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_projectId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_endUserId_fkey" FOREIGN KEY ("endUserId") REFERENCES "end_users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

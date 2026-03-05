@@ -1,6 +1,6 @@
 import { prisma } from "@/api/lib/db";
 import type { Prisma } from "@/generated/prisma/client";
-import { ApiKeyType, type Environment } from "@/generated/prisma/enums";
+import { ApiKeyType, Environment } from "@/generated/prisma/enums";
 import type {
   ApiKeyOrderByWithRelationInput,
   ApiKeyWhereInput,
@@ -10,15 +10,15 @@ import crypto from "crypto";
 
 class ApiKeyService {
   async generateApiKey({
-    type = "INGESTION",
-    environment = "DEVELOPMENT",
+    type = ApiKeyType.INGESTION,
+    environment = Environment.PRODUCTION,
   }: {
     type: ApiKeyType;
     environment: Environment;
   }) {
     // Prefix logic: e.g., il_pk (project key) vs il_sk (secret key)
-    const typePrefix = type === "INGESTION" ? "pk" : "sk";
-    const envPrefix = environment === "PRODUCTION" ? "live" : "test";
+    const typePrefix = type === ApiKeyType.INGESTION ? "pk" : "sk";
+    const envPrefix = environment === Environment.PRODUCTION ? "live" : "test";
     // Final prefix format: il_pk_live_
     const prefix = `il_${typePrefix}_${envPrefix}`;
 

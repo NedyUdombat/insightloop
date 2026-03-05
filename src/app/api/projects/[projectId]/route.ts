@@ -24,7 +24,19 @@ export const GET = requireAuth(async (req) => {
       ownerId: req.user.id,
       deletedAt: null,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      ownerId: true,
+      emailNotifications: true,
+      eventAlerts: true,
+      weeklyReports: true,
+      autoArchive: true,
+      retentionDays: true,
+      defaultEnvironment: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
       apiKeys: {
         where: {
           revokedAt: null,
@@ -38,6 +50,12 @@ export const GET = requireAuth(async (req) => {
           keyValue: true,
           keyHint: true,
           type: true,
+        },
+      },
+      _count: {
+        select: {
+          events: true,
+          feedbacks: true
         },
       },
     },
@@ -75,14 +93,34 @@ export const PATCH = requireAuth(async (req) => {
 
   const validatedProjectData = validatedData.data;
 
-  if (!validatedProjectData.name) {
-    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
-  }
-
   const updateData: UpdateProjectInput = {} as UpdateProjectInput;
 
-  if (validatedProjectData.name) {
+  // Add fields to update data if they are present
+  if (validatedProjectData.name !== undefined) {
     updateData.name = validatedProjectData.name;
+  }
+  if (validatedProjectData.emailNotifications !== undefined) {
+    updateData.emailNotifications = validatedProjectData.emailNotifications;
+  }
+  if (validatedProjectData.eventAlerts !== undefined) {
+    updateData.eventAlerts = validatedProjectData.eventAlerts;
+  }
+  if (validatedProjectData.weeklyReports !== undefined) {
+    updateData.weeklyReports = validatedProjectData.weeklyReports;
+  }
+  if (validatedProjectData.autoArchive !== undefined) {
+    updateData.autoArchive = validatedProjectData.autoArchive;
+  }
+  if (validatedProjectData.retentionDays !== undefined) {
+    updateData.retentionDays = validatedProjectData.retentionDays;
+  }
+  if (validatedProjectData.defaultEnvironment !== undefined) {
+    updateData.defaultEnvironment = validatedProjectData.defaultEnvironment;
+  }
+
+  // Check if there's anything to update
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
 
   try {
@@ -99,6 +137,7 @@ export const PATCH = requireAuth(async (req) => {
         tx,
       });
 
+      // Log general project update
       await auditService.audit({
         action: "PROJECT_UPDATED",
         userId: req.user.id,
@@ -109,8 +148,24 @@ export const PATCH = requireAuth(async (req) => {
         tx,
       });
 
+      // Log specific environment change if defaultEnvironment was updated
+      if (updateData.defaultEnvironment !== undefined) {
+        await auditService.audit({
+          action: "PROJECT_ENVIRONMENT_CHANGED",
+          userId: req.user.id,
+          metadata: {
+            projectId,
+            oldEnvironment: project.defaultEnvironment,
+            newEnvironment: updateData.defaultEnvironment,
+          },
+          tx,
+        });
+      }
+
       return updated;
     });
+
+    console.log({ updatedProject });
 
     const serialized = projectService.serializeProject(updatedProject);
 

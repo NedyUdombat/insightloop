@@ -1,13 +1,9 @@
 import AuthService from "@/api/services/AuthService";
 import { type NextRequest, NextResponse } from "next/server";
+import type { PublicUser } from "../types/IUser";
 
 export type AuthenticatedRequest = NextRequest & {
-  user: {
-    id: string;
-    email: string;
-    role: string;
-    emailVerified: boolean | null;
-  };
+  user: PublicUser;
   session: {
     id: string;
   };
@@ -41,6 +37,11 @@ export function requireAuth<
         email: user.email,
         role: user.role,
         emailVerified: user.emailVerified,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        lastProjectId: user.lastProjectId,
       };
       (req as AuthenticatedRequest).session = {
         id: session.id,

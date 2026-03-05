@@ -1,9 +1,23 @@
-import useGetProjects from "@/queries/project/useGetProjects";
+import { useProject } from "@/app/dashboard/[projectId]/ProjectContext";
 
 const useSidebarLogic = () => {
-  const { projects, isPending, isError, error } = useGetProjects();
+  const {
+    projectId,
+    projects,
+    isProjectsPending,
+    isProjectsError,
+    projectsError,
+    project,
+  } = useProject();
 
-  return { projects, isPending, isError, error };
+  return {
+    projects,
+    isProjectsPending,
+    isProjectsError,
+    projectsError,
+    projectId,
+    project,
+  };
 };
 
 export default useSidebarLogic;

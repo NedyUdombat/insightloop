@@ -15,7 +15,12 @@ import {
 import { useRouter } from "next/navigation";
 import useLogout from "@/queries/auth/useLogout";
 import useLogoutAll from "@/queries/auth/useLogoutAll";
-import { SidebarSection } from "./SidebarSection";
+import dynamic from "next/dynamic";
+
+const SidebarSection = dynamic(
+  () => import("./SidebarSection").then((mod) => ({ default: mod.SidebarSection })),
+  { ssr: false }
+);
 
 export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   const router = useRouter();

@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     }),
     rateLimitService.hit({
       key: "IDENTIFY_PROJECT",
-      identifier: auth.projectId,
+      identifier: auth.project.id,
       maxRequests: 50_000,
       windowMs: 60 * 1000,
     }),
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // Link anonymous user to identified user
       return await endUserService.linkAnonymousToIdentified({
-        projectId: auth.projectId,
+        projectId: auth.project.id,
         userId,
         anonymousId,
         traits,

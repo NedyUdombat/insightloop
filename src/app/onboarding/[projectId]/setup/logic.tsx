@@ -57,20 +57,22 @@ const useSetupLogic = () => {
   };
 
   useEffect(() => {
-    if (!isCountPending && count > 0) {
+    if (Number(count) > 0) {
+      console.log("Events have been tracked! Redirecting to success page...");
       setTimeout(() => {
-        router.push(`/dashboard/${projectId}`);
+        router.push(`/onboarding/${projectId}/success`);
       }, 1000);
     }
-  }, [count, isCountPending, router, projectId]);
+  }, [count, router, projectId]);
 
   const handleCopy = async ({
     value,
     toast,
   }: {
-    value: string;
+    value: string | undefined;
     toast: string;
   }) => {
+    if (!value) return;
     await navigator.clipboard.writeText(value);
 
     setToastMessage(toast);

@@ -24,7 +24,7 @@ const useCountProjectEvents = (projectId: string) => {
   });
 
   return {
-    count: data?.data?.count || 0,
+    count: data?.data || 0,
     isPending,
     isError,
     error,

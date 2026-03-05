@@ -1,5 +1,8 @@
-import Link from "next/link";
+"use client";
+
 import Tooltip from "@/components/tooltip";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type NavItemProps = {
   icon: React.ElementType;
@@ -18,15 +21,35 @@ export function NavItem({
   disabled,
   disabledReason,
 }: NavItemProps) {
+  const pathname = usePathname();
+
+  const isActive = pathname === href;
+
+  const baseStyles =
+    "relative flex items-center gap-3 px-3 py-2 rounded-md text-sm transition";
+
+  const activeStyles = `
+    bg-indigo-600/10
+    text-indigo-400
+    before:absolute
+    before:left-0
+    before:top-0
+    before:h-full
+    before:w-[3px]
+    before:bg-indigo-500
+    before:rounded-r
+  `;
+
+  const inactiveStyles =
+    "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800";
+
+  const disabledStyles = "text-neutral-600 cursor-not-allowed";
+
   const item = (
     <div
       className={`
-        flex items-center gap-3 px-3 py-2 rounded-md text-sm
-        ${
-          disabled
-            ? "text-neutral-600 cursor-not-allowed"
-            : "text-neutral-300 hover:bg-neutral-800"
-        }
+        ${baseStyles}
+        ${disabled ? disabledStyles : isActive ? activeStyles : inactiveStyles}
       `}
     >
       <Icon size={18} />
@@ -36,7 +59,7 @@ export function NavItem({
 
   if (disabled) {
     return (
-      <Tooltip content={disabledReason ?? ""} side={"top"} align={"end"}>
+      <Tooltip content={disabledReason ?? ""} side="top" align="end">
         {item}
       </Tooltip>
     );

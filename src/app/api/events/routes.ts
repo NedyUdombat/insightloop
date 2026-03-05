@@ -1,12 +1,12 @@
-import { requireApiKey } from "@/api/middleware/requireApiKey";
-import { NextRequest, NextResponse } from "next/server";
-import { EventSchema } from "@/api/validators/event";
-import EventService from "@/api/services/EventService";
-import { headers } from "next/headers";
 import { prisma } from "@/api/lib/db";
 import { resolveEventTimestamp } from "@/api/lib/eventTimestamp";
+import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
+import EventService from "@/api/services/EventService";
 import RateLimitService from "@/api/services/RateLimitService";
+import { EventSchema } from "@/api/validators/event";
+import { headers } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 const MAX_PAYLOAD_BYTES = 32 * 1024; // 32KB - tweak
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }),
     rateLimitService.hit({
       key: "EVENT_INGEST_PROJECT",
-      identifier: auth.projectId,
+      identifier: auth.project.id,
       maxRequests: 50_000,
       windowMs: 60 * 1000,
     }),
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       const externalUserId = userId || anonymousId || null;
 
       const resolvedEndUser = await endUserService.resolveEndUser({
-        projectId: auth.projectId,
+        projectId: auth.project.id,
         externalUserId,
         tx,
       });
@@ -74,8 +74,9 @@ export async function POST(req: NextRequest) {
         eventName,
         eventTimeStamp: timestamp,
         properties: properties || {},
-        projectId: auth.projectId,
+        projectId: auth.project.id,
         endUserId: resolvedEndUser?.id,
+        environment: auth.apiKey.environment,
         tx,
       });
     });

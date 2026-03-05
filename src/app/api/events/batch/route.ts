@@ -1,12 +1,12 @@
-import { requireApiKey } from "@/api/middleware/requireApiKey";
-import { NextRequest, NextResponse } from "next/server";
-import { BatchEventSchema } from "@/api/validators/event";
-import EventService from "@/api/services/EventService";
-import { headers } from "next/headers";
 import { prisma } from "@/api/lib/db";
 import { resolveEventTimestamp } from "@/api/lib/eventTimestamp";
+import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
+import EventService from "@/api/services/EventService";
 import RateLimitService from "@/api/services/RateLimitService";
+import { BatchEventSchema } from "@/api/validators/event";
+import { headers } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 
 const MAX_PAYLOAD_BYTES = 32 * 1024; // 32KB - tweak
 
@@ -20,22 +20,39 @@ export async function POST(req: NextRequest) {
   const endUserService = new EndUserService();
   const rateLimitService = new RateLimitService();
 
-  const [apiKeyLimit, projectLimit] = await Promise.all([
+  // Environment-specific rate limits
+  const isDevelopment = auth.apiKey.environment === "DEVELOPMENT";
+  const isStaging = auth.apiKey.environment === "STAGING";
+
+  // Development: Lower limits for testing
+  // Staging: Medium limits for pre-production testing
+  // Production: Higher limits for live traffic
+  const apiKeyMaxRequests = isDevelopment ? 100 : isStaging ? 500 : 1000;
+  const projectMaxRequests = isDevelopment ? 5_000 : isStaging ? 25_000 : 50_000;
+
+  const [apiKeyLimit, projectLimit, environmentLimit] = await Promise.all([
     rateLimitService.hit({
       key: "EVENT_INGEST",
       identifier: auth.apiKeyId,
-      maxRequests: 1000,
+      maxRequests: apiKeyMaxRequests,
       windowMs: 60 * 1000, // 1 minute
     }),
     rateLimitService.hit({
       key: "EVENT_INGEST_PROJECT",
-      identifier: auth.projectId,
-      maxRequests: 50_000,
+      identifier: auth.project.id,
+      maxRequests: projectMaxRequests,
+      windowMs: 60 * 1000,
+    }),
+    // Per-environment rate limit
+    rateLimitService.hit({
+      key: `EVENT_INGEST_ENV_${auth.apiKey.environment}`,
+      identifier: `${auth.project.id}_${auth.apiKey.environment}`,
+      maxRequests: projectMaxRequests,
       windowMs: 60 * 1000,
     }),
   ]);
 
-  if (!apiKeyLimit.allowed || !projectLimit.allowed) {
+  if (!apiKeyLimit.allowed || !projectLimit.allowed || !environmentLimit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
@@ -75,7 +92,7 @@ export async function POST(req: NextRequest) {
 
         // Resolve or create EndUser
         const resolvedEndUser = await endUserService.resolveEndUser({
-          projectId: auth.projectId,
+          projectId: auth.project.id,
           externalUserId,
           tx,
         });
@@ -88,8 +105,9 @@ export async function POST(req: NextRequest) {
           eventName: event.eventName,
           eventTimeStamp: timestamp,
           properties: event.properties || {},
-          projectId: auth.projectId,
+          projectId: auth.project.id,
           endUserId: resolvedEndUser?.id,
+          environment: auth.apiKey.environment,
           tx,
         });
       }

@@ -1,9 +1,11 @@
 import {
-  LayoutDashboard,
   Activity,
-  MessageSquare,
   AlertTriangle,
+  LayoutDashboard,
+  MessageSquare,
+  Settings,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import { NavItem } from "./NavItem";
 
 export function SidebarNav({
@@ -15,19 +17,21 @@ export function SidebarNav({
   hasProject: boolean;
   hasEvents: boolean;
 }) {
+  const params = useParams();
+  const currentProjectId = params.projectId as string;
   return (
     <nav className="mt-4 px-2 space-y-1">
       <NavItem
         icon={LayoutDashboard}
         label="Dashboard"
-        href="/dashboard"
+        href={`/dashboard/${currentProjectId}`}
         collapsed={collapsed}
       />
 
       <NavItem
         icon={Activity}
         label="Events"
-        href="/events"
+        href={`/dashboard/${currentProjectId}/events`}
         collapsed={collapsed}
         disabled={!hasProject}
         disabledReason="Create a project first"
@@ -36,19 +40,28 @@ export function SidebarNav({
       <NavItem
         icon={MessageSquare}
         label="Feedback"
-        href="/feedback"
+        href={`/dashboard/${currentProjectId}/feedback`}
         collapsed={collapsed}
-        disabled={!hasEvents}
+        disabled={!hasProject}
         disabledReason="Available after first event"
       />
 
       <NavItem
         icon={AlertTriangle}
         label="Friction"
-        href="/friction"
+        href={`/dashboard/${currentProjectId}/friction`}
         collapsed={collapsed}
         disabled={!hasEvents}
         disabledReason="Requires event data"
+      />
+
+      <NavItem
+        icon={Settings}
+        label="Settings"
+        href={`/dashboard/${currentProjectId}/settings`}
+        collapsed={collapsed}
+        disabled={!hasProject}
+        disabledReason="Create a project first"
       />
     </nav>
   );

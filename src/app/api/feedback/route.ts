@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/api/lib/db";
 import { requireApiKey } from "@/api/middleware/requireApiKey";
-import RateLimitService from "@/api/services/RateLimitService";
-import { SDKFeedbackSchema } from "@/api/validators/feedback";
 import EndUserService from "@/api/services/EndUserService";
 import FeedbackService from "@/api/services/FeedbackService";
-import { prisma } from "@/api/lib/db";
+import RateLimitService from "@/api/services/RateLimitService";
+import { SDKFeedbackSchema } from "@/api/validators/feedback";
+import { type NextRequest, NextResponse } from "next/server";
 
 const MAX_PAYLOAD_BYTES = 24 * 1024; // feedback should be smaller
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }),
     rateLimitService.hit({
       key: "FEEDBACK_INGEST_PROJECT",
-      identifier: auth.projectId,
+      identifier: auth.project.id,
       maxRequests: 50_000,
       windowMs: 60 * 1000,
     }),
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
   try {
     await prisma.$transaction(async (tx) => {
       const resolvedEndUser = await endUserService.resolveEndUser({
-        projectId: auth.projectId,
+        projectId: auth.project.id,
         externalUserId,
         email: null, // Feedback doesn't carry email/name (only identify does)
         name: null,
@@ -78,9 +78,10 @@ export async function POST(req: NextRequest) {
       };
 
       await feedbackService.createFeedback({
-        projectId: auth.projectId,
+        projectId: auth.project.id,
         endUserId: resolvedEndUser?.id,
         message: feedback.text, // SDK uses "text", backend uses "message"
+        environment: auth.apiKey.environment,
         metadata,
         tx,
       });

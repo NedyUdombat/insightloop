@@ -1,4 +1,4 @@
-import type { IProject } from "@/api/types/IProject";
+import type { PublicProject } from "@/api/types/IProject";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { getProjectList } from "./call";
 
@@ -8,8 +8,8 @@ const useGetProjects = () => {
     isPending,
     isError,
     error,
-  }: UseQueryResult<GenericResponse<IProject[]>, Error> = useQuery<
-    GenericResponse<IProject[]>,
+  }: UseQueryResult<GenericResponse<PublicProject[]>, Error> = useQuery<
+    GenericResponse<PublicProject[]>,
     Error
   >({
     queryKey: ["projects"],

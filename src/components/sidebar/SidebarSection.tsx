@@ -36,9 +36,11 @@ export function SidebarSection({
         <Popover.Content
           side="right"
           align="end"
-          className="min-w-55 rounded-md border border-neutral-800 bg-neutral-900 p-2"
+          className="min-w-55 rounded-md border border-neutral-800 bg-neutral-900 p-2 overflow-hidden"
         >
-          {children}
+          <div className="overflow-y-auto max-h-[400px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {children}
+          </div>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

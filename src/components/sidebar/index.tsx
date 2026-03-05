@@ -14,11 +14,7 @@ const ProjectSwitcher = dynamic(() => import("./ProjectSwitcher"), {
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
-  // fake app state
-  const hasProject = false;
-  const hasEvents = false;
-
-  const { projects, isPending, isError, error } = useSidebarLogic();
+  const { projects, project } = useSidebarLogic();
 
   return (
     <aside
@@ -26,6 +22,9 @@ export default function Sidebar() {
     ${collapsed ? "w-16" : "w-64"}
     h-screen
     min-h-screen
+    fixed
+    left-0
+    top-0
     transition-all duration-200
     border-r border-neutral-800
     bg-neutral-900
@@ -42,8 +41,8 @@ export default function Sidebar() {
 
       <SidebarNav
         collapsed={collapsed}
-        hasProject={hasProject}
-        hasEvents={hasEvents}
+        hasProject={!!project}
+        hasEvents={(project && project?.eventsCount > 0) || false}
       />
 
       <div className="flex-1" />

@@ -74,16 +74,19 @@ class ProjectService {
     where,
     tx,
     include,
+    select,
   }: {
     where: ProjectWhereInput;
     tx?: PrismaClient;
     include?: ProjectInclude;
+    select?: Prisma.ProjectSelect;
   }) {
     const db = tx ?? prisma;
 
     return db.project.findFirst({
       where,
       include,
+      select,
     });
   }
 
@@ -174,9 +177,17 @@ class ProjectService {
       id: project.id,
       name: project.name,
       ownerId: project.ownerId,
+      emailNotifications: project.emailNotifications,
+      eventAlerts: project.eventAlerts,
+      weeklyReports: project.weeklyReports,
+      autoArchive: project.autoArchive,
+      retentionDays: project.retentionDays,
+      defaultEnvironment: project.defaultEnvironment,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
       apiKeys: project.apiKeys,
+      eventsCount: project?._count?.events,
+      feedbackCount: project?._count?.feedbacks,
     } as PublicProject;
   }
 }
