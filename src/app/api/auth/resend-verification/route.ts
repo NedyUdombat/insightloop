@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/api/lib/client";
 import AuditService from "@/api/services/AuditService";
 import AuthService from "@/api/services/AuthService";
-import TokenService from "@/api/services/TokenService";
-import RateLimitService from "@/api/services/RateLimitService";
-import { getClientIp } from "@/api/lib/client";
 import EmailService from "@/api/services/EmailService";
+import RateLimitService from "@/api/services/RateLimitService";
+import TokenService from "@/api/services/TokenService";
 
 const GENERIC_RESPONSE = {
   success: true,

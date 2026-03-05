@@ -53,6 +53,7 @@ export async function updateProject(
     "PATCH",
     `/projects/${payload.projectId}`,
     {
+      name: payload.name,
       autoArchive: payload.preferences?.autoArchive,
       emailNotifications: payload.preferences?.emailNotifications,
       eventAlerts: payload.preferences?.eventAlerts,

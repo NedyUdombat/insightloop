@@ -1,7 +1,7 @@
 "use client";
 
-import { FeedbackStatus } from "@/generated/prisma/enums";
 import { useEffect, useRef, useState } from "react";
+import { FeedbackStatus } from "@/generated/prisma/enums";
 
 interface StatusBadgeProps {
   status: FeedbackStatus;

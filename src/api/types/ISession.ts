@@ -1,5 +1,5 @@
-import { type IModel } from "./IModel";
-import { IUser } from "@/api/types/IUser";
+import type { IUser } from "@/api/types/IUser";
+import type { IModel } from "./IModel";
 
 export interface ISession extends IModel {
   userId: string;

@@ -1,5 +1,6 @@
 import type { UserRole } from "@/generated/prisma/enums";
 import type { IModel } from "./IModel";
+import type { IProject } from "./IProject";
 
 export interface IUser extends IModel {
   firstname: string;
@@ -14,7 +15,7 @@ export interface IUser extends IModel {
   loginFails: number | null;
   accountLock: Date | null;
   lastAccessed: Date | null;
-  projects?: Record<string, any>[];
+  projects?: IProject[];
   lastProjectId: string | null; // ID of the last accessed project
 }
 
@@ -27,6 +28,6 @@ export interface PublicUser {
   email: string;
   role: UserRole;
   emailVerified: boolean | null;
-  projects?: Record<string, any>[];
+  projects?: IProject[];
   lastProjectId: string | null;
 }

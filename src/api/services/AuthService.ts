@@ -1,8 +1,8 @@
-import { prisma } from "@/api/lib/db";
-import { cookies, headers } from "next/headers";
 import * as argon2 from "argon2";
-import { ISession } from "@/api/types/ISession";
 import { addMinutes } from "date-fns";
+import { cookies, headers } from "next/headers";
+import { prisma } from "@/api/lib/db";
+import type { ISession } from "@/api/types/ISession";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 const ROLLING_THRESHOLD_MS = 1000 * 60 * 60 * 24; // 1 day

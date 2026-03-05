@@ -16,4 +16,5 @@ export interface IApiKey extends IModel {
   type: ApiKeyType;
   keyHint: string;
   keyValue?: string; // Only included when the key is first created
+  lastUsedAt: Date | null;
 }

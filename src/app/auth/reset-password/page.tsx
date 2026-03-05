@@ -1,9 +1,9 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
-import { Loader2 } from "lucide-react";
 import useResetPasswordPage from "./logic";
 
 function ResetPasswordContent() {

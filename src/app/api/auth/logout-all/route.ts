@@ -1,7 +1,7 @@
-import AuthService from "@/api/services/AuthService";
-import AuditService from "@/api/services/AuditService";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
+import AuditService from "@/api/services/AuditService";
+import AuthService from "@/api/services/AuthService";
 
 export const POST = requireAuth(async (req) => {
   const authService = new AuthService();

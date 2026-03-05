@@ -1,5 +1,5 @@
-import type { Environment } from "@/generated/prisma/enums";
 import { NextResponse } from "next/server";
+import type { Environment } from "@/generated/prisma/enums";
 
 /**
  * Validates that the environment from the API key matches the expected environment
@@ -78,7 +78,11 @@ export function detectProductionKeyMisuse(
   isMisuse: boolean;
   warning?: string;
 } {
-  const { nodeEnv, host, devDomains = ["localhost", "127.0.0.1", "dev.", "staging."] } = context;
+  const {
+    nodeEnv,
+    host,
+    devDomains = ["localhost", "127.0.0.1", "dev.", "staging."],
+  } = context;
 
   // Check if using production API key in development environment
   if (apiKeyEnvironment === "PRODUCTION") {
@@ -93,7 +97,7 @@ export function detectProductionKeyMisuse(
     // Check if host is a development domain
     if (host) {
       const isDevHost = devDomains.some((devDomain) =>
-        host.includes(devDomain)
+        host.includes(devDomain),
       );
       if (isDevHost) {
         return {
@@ -106,7 +110,11 @@ export function detectProductionKeyMisuse(
 
   // Check if using staging API key in production environment
   if (apiKeyEnvironment === "STAGING") {
-    if (nodeEnv === "production" && host && !devDomains.some((devDomain) => host.includes(devDomain))) {
+    if (
+      nodeEnv === "production" &&
+      host &&
+      !devDomains.some((devDomain) => host.includes(devDomain))
+    ) {
       return {
         isMisuse: true,
         warning: "Staging API key used in production environment",

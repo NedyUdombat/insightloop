@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
 import { resolveEventTimestamp } from "@/api/lib/eventTimestamp";
 import { requireApiKey } from "@/api/middleware/requireApiKey";
@@ -5,8 +7,6 @@ import EndUserService from "@/api/services/EndUserService";
 import EventService from "@/api/services/EventService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { BatchEventSchema } from "@/api/validators/event";
-import { headers } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
 
 const MAX_PAYLOAD_BYTES = 32 * 1024; // 32KB - tweak
 
@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
   // Staging: Medium limits for pre-production testing
   // Production: Higher limits for live traffic
   const apiKeyMaxRequests = isDevelopment ? 100 : isStaging ? 500 : 1000;
-  const projectMaxRequests = isDevelopment ? 5_000 : isStaging ? 25_000 : 50_000;
+  const projectMaxRequests = isDevelopment
+    ? 5_000
+    : isStaging
+      ? 25_000
+      : 50_000;
 
   const [apiKeyLimit, projectLimit, environmentLimit] = await Promise.all([
     rateLimitService.hit({
@@ -52,7 +56,11 @@ export async function POST(req: NextRequest) {
     }),
   ]);
 
-  if (!apiKeyLimit.allowed || !projectLimit.allowed || !environmentLimit.allowed) {
+  if (
+    !apiKeyLimit.allowed ||
+    !projectLimit.allowed ||
+    !environmentLimit.allowed
+  ) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 

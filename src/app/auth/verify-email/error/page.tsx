@@ -1,9 +1,9 @@
 "use client";
 
-import { useVerifyEmailErrorPage } from "@/app/auth/verify-email/error/logic";
-import { AuthForm } from "@/components/auth/AuthForm";
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
+import { useVerifyEmailErrorPage } from "@/app/auth/verify-email/error/logic";
+import { AuthForm } from "@/components/auth/AuthForm";
 
 function VerifyEmailErrorContent() {
   const {

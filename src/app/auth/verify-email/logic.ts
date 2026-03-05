@@ -1,8 +1,8 @@
-import useVerifyEmail from "@/queries/auth/useVerifyEmail";
-import useResendVerification from "@/queries/auth/useResendVerification";
-import useLogout from "@/queries/auth/useLogout";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import useLogout from "@/queries/auth/useLogout";
+import useResendVerification from "@/queries/auth/useResendVerification";
+import useVerifyEmail from "@/queries/auth/useVerifyEmail";
 
 const RESEND_COOLDOWN_MS = 60_000;
 

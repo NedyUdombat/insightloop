@@ -5,8 +5,16 @@ import type { GetEventsParams } from "./types";
 export async function getEvents(
   params: GetEventsParams,
 ): Promise<GenericResponse<PublicEvent[]>> {
-  const { projectId, page, limit, search, eventName, startDate, endDate, endUserId } =
-    params;
+  const {
+    projectId,
+    page,
+    limit,
+    search,
+    eventName,
+    startDate,
+    endDate,
+    endUserId,
+  } = params;
 
   const queryParams = new URLSearchParams();
   if (page) queryParams.append("page", page.toString());

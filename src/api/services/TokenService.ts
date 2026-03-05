@@ -1,7 +1,7 @@
-import { TokenType } from "@/generated/prisma/enums";
+import crypto from "node:crypto";
+import type { PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
-import crypto from "crypto";
-import { PrismaClient } from "@prisma/client/extension";
+import { TokenType } from "@/generated/prisma/enums";
 
 const DEFAULT_BYTES = 48;
 

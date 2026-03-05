@@ -1,12 +1,13 @@
+import crypto from "node:crypto";
+import type { PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { Prisma } from "@/generated/prisma/client";
 import { ApiKeyType, Environment } from "@/generated/prisma/enums";
 import type {
+  ApiKeyInclude,
   ApiKeyOrderByWithRelationInput,
   ApiKeyWhereInput,
 } from "@/generated/prisma/models/ApiKey";
-import type { PrismaClient } from "@prisma/client/extension";
-import crypto from "crypto";
 
 class ApiKeyService {
   async generateApiKey({
@@ -130,7 +131,7 @@ class ApiKeyService {
   }: {
     where: ApiKeyWhereInput;
     tx?: PrismaClient;
-    include?: Record<string, any>;
+    include?: ApiKeyInclude;
   }) {
     const db = tx ?? prisma;
     return db.apiKey.findFirst({

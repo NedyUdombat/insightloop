@@ -1,5 +1,5 @@
-import { type IModel } from "./IModel";
-import { type IProject } from "./IProject";
+import type { IModel } from "./IModel";
+import type { IProject } from "./IProject";
 
 export interface IEndUser extends IModel {
   name: string;

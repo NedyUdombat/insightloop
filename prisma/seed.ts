@@ -1,5 +1,9 @@
-import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import {
+  Environment,
+  FeedbackStatus,
+  PrismaClient,
+} from "@/generated/prisma/client";
 import "dotenv/config";
 import { Pool } from "pg";
 
@@ -10,7 +14,6 @@ const pool = new Pool({
 
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
-
 
 async function main() {
   console.log("Seeding database...");
@@ -51,20 +54,22 @@ async function main() {
     console.log("Project seeded:", project);
 
     // 3. Seed Ingestion API Key for Development
-    const crypto = await import("crypto");
-    const apiKeyValue = `il_dev_${crypto.randomBytes(32).toString("hex")}`;
+    const crypto = await import("node:crypto");
+    const prefix = "il_pk_test";
+    const entropy = crypto.randomBytes(32).toString("hex");
+    const apiKeyValue = `${prefix}_${entropy}`;
     const apiKeyHash = crypto
       .createHash("sha256")
       .update(apiKeyValue)
       .digest("hex");
-    const apiKeyHint = apiKeyValue.slice(-8);
+    const keyHint = `${prefix}_${entropy.slice(0, 4)}...${entropy.slice(-4)}`;
 
     const apiKey = await tx.apiKey.create({
       data: {
         name: "Development API Key",
         keyValue: apiKeyValue,
         keyHash: apiKeyHash,
-        keyHint: apiKeyHint,
+        keyHint: keyHint,
         type: "INGESTION",
         environment: "DEVELOPMENT",
         projectId: project.id,
@@ -130,9 +135,9 @@ async function main() {
 
     // Helper function to create realistic event flows
     const createUserFlow = async (
-      endUser: typeof endUsers[0],
+      endUser: (typeof endUsers)[0],
       userIndex: number,
-      startOffset: number
+      startOffset: number,
     ) => {
       const flows = [
         // Development events (40% of total)
@@ -151,7 +156,10 @@ async function main() {
             {
               name: "signup_started",
               offset: 2000,
-              props: { source: "homepage_cta", session_id: `sess_dev_${userIndex}_1` },
+              props: {
+                source: "homepage_cta",
+                session_id: `sess_dev_${userIndex}_1`,
+              },
             },
             {
               name: "signup_completed",
@@ -208,7 +216,10 @@ async function main() {
             {
               name: "login_attempted",
               offset: 300000,
-              props: { method: "email", session_id: `sess_prod_${userIndex}_1` },
+              props: {
+                method: "email",
+                session_id: `sess_prod_${userIndex}_1`,
+              },
             },
             {
               name: "login_succeeded",
@@ -222,7 +233,10 @@ async function main() {
             {
               name: "dashboard_viewed",
               offset: 305000,
-              props: { widgets_loaded: 5, session_id: `sess_prod_${userIndex}_1` },
+              props: {
+                widgets_loaded: 5,
+                session_id: `sess_prod_${userIndex}_1`,
+              },
             },
             {
               name: "checkout_started",
@@ -350,11 +364,11 @@ async function main() {
     for (let i = 0; i < additionalEventsNeeded; i++) {
       const userIndex = i % endUsers.length;
       const envs = [
-        "DEVELOPMENT",
-        "DEVELOPMENT",
-        "PRODUCTION",
-        "PRODUCTION",
-        "STAGING",
+        Environment.DEVELOPMENT,
+        Environment.DEVELOPMENT,
+        Environment.PRODUCTION,
+        Environment.PRODUCTION,
+        Environment.STAGING,
       ];
       events.push({
         eventName: [
@@ -396,7 +410,12 @@ async function main() {
 
     // 6. Seed 15 Feedback items
     const feedbacks = [];
-    const statuses = ["NEW", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+    const statuses = [
+      FeedbackStatus.NEW,
+      FeedbackStatus.IN_PROGRESS,
+      FeedbackStatus.RESOLVED,
+      FeedbackStatus.CLOSED,
+    ];
     const ratings = [1, 2, 3, 4, 5];
     const feedbackUsers = [endUsers[0], endUsers[1], endUsers[2], endUsers[4]]; // 3 known + 1 anon
 
@@ -479,7 +498,8 @@ async function main() {
       },
       {
         title: "Filter options are limited",
-        message: "Need more filter options for product search, especially price ranges.",
+        message:
+          "Need more filter options for product search, especially price ranges.",
         additionalInfo: null,
         rating: 3,
       },
@@ -511,7 +531,7 @@ async function main() {
       const shouldOmitFields = Math.random() < 0.125; // 10-15% chance
 
       // Time variations
-      let timeOffset;
+      let timeOffset: number;
       if (i % 3 === 0) {
         timeOffset = i * 86400000; // Days apart
       } else if (i % 3 === 1) {
@@ -519,7 +539,13 @@ async function main() {
       } else {
         timeOffset = i * 60000; // Minutes apart
       }
-
+      const envs = [
+        Environment.DEVELOPMENT,
+        Environment.DEVELOPMENT,
+        Environment.PRODUCTION,
+        Environment.PRODUCTION,
+        Environment.STAGING,
+      ];
       feedbacks.push({
         title: shouldOmitFields ? null : template.title,
         message: template.message,
@@ -529,7 +555,7 @@ async function main() {
         feedbackTimestamp: new Date(baseTime - timeOffset),
         projectId: project.id,
         endUserId: feedbackUsers[userIndex].id,
-        environment: ["DEVELOPMENT", "PRODUCTION", "STAGING"][i % 3],
+        environment: envs[i % 3],
         properties: {
           page: ["checkout", "product_detail", "dashboard", "search"][i % 4],
           component: [
@@ -550,18 +576,12 @@ async function main() {
           }`,
           host: "shop.naijamall.ng",
           pathname: `/${["checkout", "products", "dashboard", "search"][i % 4]}`,
-          geoip_country_name: [
-            "Nigeria",
-            "Kenya",
-            "South Africa",
-            "Ghana",
-          ][i % 4],
-          geoip_city_name: [
-            "Port Harcourt",
-            "Mombasa",
-            "Cape Town",
-            "Kumasi",
-          ][i % 4],
+          geoip_country_name: ["Nigeria", "Kenya", "South Africa", "Ghana"][
+            i % 4
+          ],
+          geoip_city_name: ["Port Harcourt", "Mombasa", "Cape Town", "Kumasi"][
+            i % 4
+          ],
           lib: "insightloop-browser",
           lib_version: "1.102.1",
           viewport_width: 1920,

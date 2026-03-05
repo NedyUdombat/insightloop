@@ -1,7 +1,7 @@
-import useResetPassword from "@/queries/auth/useResetPassword";
-import { isPasswordStrong } from "@/components/auth/PasswordStrength";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { isPasswordStrong } from "@/components/auth/PasswordStrength";
+import useResetPassword from "@/queries/auth/useResetPassword";
 
 const useResetPasswordPage = () => {
   const router = useRouter();

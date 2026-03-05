@@ -1,5 +1,5 @@
-import { prisma } from "@/api/lib/db";
 import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/api/lib/db";
 
 const AUTH_ROUTES = [
   "/auth/login",

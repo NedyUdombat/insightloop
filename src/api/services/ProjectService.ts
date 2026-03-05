@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { Prisma } from "@/generated/prisma/browser";
 import type {
@@ -5,7 +6,6 @@ import type {
   ProjectOrderByWithRelationInput,
   ProjectWhereInput,
 } from "@/generated/prisma/models/Project";
-import type { PrismaClient } from "@prisma/client/extension";
 import type { IProject, PublicProject } from "../types/IProject";
 
 const MAX_PROJECTS_PER_USER = 5;
@@ -14,10 +14,22 @@ class ProjectService {
   async createProject({
     name,
     ownerId,
+    emailNotifications,
+    eventAlerts,
+    weeklyReports,
+    autoArchive,
+    retentionDays,
+    defaultEnvironment,
     tx,
   }: {
     name: string;
     ownerId: string;
+    emailNotifications?: boolean;
+    eventAlerts?: boolean;
+    weeklyReports?: boolean;
+    autoArchive?: boolean;
+    retentionDays?: number;
+    defaultEnvironment?: string;
     tx?: PrismaClient;
   }) {
     const db = tx ?? prisma;
@@ -25,6 +37,12 @@ class ProjectService {
       data: {
         name,
         ownerId,
+        emailNotifications,
+        eventAlerts,
+        weeklyReports,
+        autoArchive,
+        retentionDays,
+        defaultEnvironment,
       },
     });
   }
@@ -146,7 +164,9 @@ class ProjectService {
     });
 
     if (!project) {
-      const error: any = new Error("Project not found");
+      const error = new Error("Project not found") as Error & {
+        statusCode?: number;
+      };
       error.statusCode = 404;
       throw error;
     }

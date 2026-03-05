@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { CreateUserSchema } from "@/api/validators/user";
-import UserService from "@/api/services/UserService";
-import AuthService from "@/api/services/AuthService";
-import AuditService from "@/api/services/AuditService";
-import RateLimitService from "@/api/services/RateLimitService";
-import EmailService from "@/api/services/EmailService";
-import TokenService from "@/api/services/TokenService";
-import { getClientIp, getClientMeta } from "@/api/lib/client";
-import { isUniqueConstraintError } from "@/api/lib/error";
-import { TokenType } from "@/generated/prisma/enums";
-import { prisma } from "@/api/lib/db";
+import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import crypto from "crypto";
+import { type NextRequest, NextResponse } from "next/server";
+import { getClientIp, getClientMeta } from "@/api/lib/client";
+import { prisma } from "@/api/lib/db";
+import { isUniqueConstraintError } from "@/api/lib/error";
+import AuditService from "@/api/services/AuditService";
+import AuthService from "@/api/services/AuthService";
+import EmailService from "@/api/services/EmailService";
+import RateLimitService from "@/api/services/RateLimitService";
+import TokenService from "@/api/services/TokenService";
+import UserService from "@/api/services/UserService";
+import { CreateUserSchema } from "@/api/validators/user";
+import { TokenType } from "@/generated/prisma/enums";
 
 const isProd =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ||

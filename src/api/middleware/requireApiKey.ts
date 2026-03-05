@@ -1,9 +1,9 @@
-import ApiKeyService from "@/api/services/ApiKeyService";
-import { detectProductionKeyMisuse } from "@/api/middleware/validateEnvironment";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
+import { detectProductionKeyMisuse } from "@/api/middleware/validateEnvironment";
+import ApiKeyService from "@/api/services/ApiKeyService";
 
-export async function requireApiKey(req: NextRequest) {
+export async function requireApiKey(_req: NextRequest) {
   const headerStore = await headers();
   const apiKeyService = new ApiKeyService();
   const authHeader = headerStore.get("authorization");

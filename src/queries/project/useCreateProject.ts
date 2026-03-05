@@ -17,7 +17,7 @@ const useCreateProject = () => {
     Error,
     CreateProjectPayload
   >({
-    mutationFn: async ({ name }) => createProject({ name }),
+    mutationFn: async (payload) => createProject(payload),
     retry: false,
   });
 

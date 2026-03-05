@@ -1,10 +1,10 @@
+import { NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
 import AuditService from "@/api/services/AuditService";
 import ProjectService from "@/api/services/ProjectService";
 import { CreateApiKeySchema } from "@/api/validators/project";
-import { NextResponse } from "next/server";
 
 export const POST = requireAuth(async (req) => {
   const projectService = new ProjectService();
@@ -79,7 +79,8 @@ export const POST = requireAuth(async (req) => {
           apiKeyName: name,
           apiKeyType: type,
           keyHint,
-          warning: "Production API key generated - ensure secure storage and usage",
+          warning:
+            "Production API key generated - ensure secure storage and usage",
         },
         tx,
       });

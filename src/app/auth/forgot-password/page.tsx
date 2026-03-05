@@ -1,7 +1,7 @@
 "use client";
 
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { AuthForm } from "@/components/auth/AuthForm";
-import { Loader2, CheckCircle2 } from "lucide-react";
 import useForgotPasswordPage from "./logic";
 
 export default function ForgotPasswordPage() {

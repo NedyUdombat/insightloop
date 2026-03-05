@@ -1,10 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { PublicProject } from "@/api/types/IProject";
 import type { Environment } from "@/generated/prisma/enums";
 import useDeleteProject from "@/queries/project/useDeleteProject";
 import useUpdateProject from "@/queries/project/useUpdateProject";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useProject } from "../ProjectContext";
 
 export interface ProjectPreferences {
@@ -17,16 +18,19 @@ export interface ProjectPreferences {
 }
 
 const useProjectSettingsLogic = () => {
-  const { project, projectId, projects } = useProject();
+  const { project, projectId, projects, isSingleProjectPending } = useProject();
   const router = useRouter();
+
+  console.log({
+    isSingleProjectPending,
+    project,
+  });
 
   // Form state
   const [projectName, setProjectName] = useState(project?.name || "");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-
 
   // Preferences state
   const [preferences, setPreferences] = useState<ProjectPreferences>({
@@ -48,7 +52,8 @@ const useProjectSettingsLogic = () => {
         weeklyReports: project.weeklyReports ?? false,
         autoArchive: project.autoArchive ?? false,
         retentionDays: project.retentionDays ?? 30,
-        defaultEnvironment: (project.defaultEnvironment as Environment) ?? "PRODUCTION",
+        defaultEnvironment:
+          (project.defaultEnvironment as Environment) ?? "PRODUCTION",
       });
     }
   }, [project]);
@@ -81,6 +86,11 @@ const useProjectSettingsLogic = () => {
     }
 
     setError(null);
+    console.log({
+      projectId,
+      name: projectName,
+      preferences,
+    });
 
     updateProjectMutation(
       {
@@ -122,7 +132,7 @@ const useProjectSettingsLogic = () => {
           if (remainingProjects.length > 0) {
             // Find the project that comes before the deleted one, or the first alphabetically
             const currentIndex = projects.findIndex((p) => p.id === projectId);
-            let targetProject;
+            let targetProject: PublicProject;
 
             if (currentIndex > 0) {
               // Redirect to the previous project in the list
@@ -172,6 +182,7 @@ const useProjectSettingsLogic = () => {
     handleDeleteProject,
     isUpdating,
     isDeleting,
+    isSingleProjectPending,
   };
 };
 

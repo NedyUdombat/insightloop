@@ -1,10 +1,10 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import type { ReactNode } from "react";
 import DashboardSidebar from "@/components/sidebar";
 import { getInitialsFromName } from "@/lib/utils";
 import useGetCurrentUser from "@/queries/user/useGetCurrentUser";
-import { useParams } from "next/navigation";
-import type { ReactNode } from "react";
 import { ProjectProvider } from "./ProjectContext";
 
 export default function ProjectLayout({ children }: { children: ReactNode }) {

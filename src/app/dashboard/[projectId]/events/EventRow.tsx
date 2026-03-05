@@ -1,7 +1,8 @@
 "use client";
 
-import type { PublicEvent } from "@/api/types/IEvent";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import type { PublicEvent } from "@/api/types/IEvent";
 import EnvironmentPill from "./EnvironmentPill";
 import MetadataTable from "./MetadataTable";
 import PropertiesTable from "./PropertiesTable";
@@ -59,34 +60,9 @@ export default function EventRow({ event }: EventRowProps) {
         <td className="px-4 py-4">
           <div className="flex items-center text-neutral-500 group-hover:text-indigo-400 transition-all transform group-hover:scale-110">
             {isExpanded ? (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                alt="sew"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ChevronDown className="w-4 h-4" />
             ) : (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRight className="w-4 h-4" />
             )}
           </div>
         </td>

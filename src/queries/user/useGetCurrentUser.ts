@@ -1,5 +1,5 @@
-import type { PublicUser } from "@/api/types/IUser";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import type { PublicUser } from "@/api/types/IUser";
 import { fetchCurrentUser } from "./call";
 
 const useGetCurrentUser = () => {

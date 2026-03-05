@@ -1,6 +1,6 @@
+import type { Prisma, PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { Environment } from "@/generated/prisma/enums";
-import type { PrismaClient } from "@prisma/client/extension";
 import type { IEvent } from "../types/IEvent";
 
 class EventService {
@@ -16,7 +16,7 @@ class EventService {
     projectId: string;
     eventName: string;
     eventTimeStamp: Date;
-    properties: any;
+    properties: Record<string, unknown> | null;
     endUserId?: string | null;
     tx?: PrismaClient;
     environment: Environment;
@@ -44,7 +44,7 @@ class EventService {
     startDate?: Date;
     endDate?: Date;
   }) {
-    const whereClause: any = {
+    const whereClause: Prisma.EventWhereInput = {
       projectId,
     };
 
@@ -89,7 +89,7 @@ class EventService {
     projectId: string;
     limit?: number;
   }) {
-    return prisma.event.findMany({
+    const events = prisma.event.findMany({
       where: { projectId },
       orderBy: { eventTimestamp: "desc" },
       take: limit,
@@ -103,8 +103,20 @@ class EventService {
         endUserId: true,
         environment: true,
         createdAt: true,
+        deletedAt: true,
+        updatedAt: true,
+        endUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            externalUserId: true,
+          },
+        },
       },
-    });
+    }) as unknown as IEvent[];
+
+    return events;
   }
 
   async getEvents({
@@ -128,7 +140,7 @@ class EventService {
   }) {
     const skip = (page - 1) * limit;
 
-    const whereClause: any = {
+    const whereClause: Prisma.EventWhereInput = {
       projectId,
     };
 
@@ -176,16 +188,7 @@ class EventService {
         skip,
         take: limit + 1, // Fetch one extra to check if there are more
         orderBy: { eventTimestamp: "desc" },
-        // include: {
-        //   endUser: {
-        //     select: {
-        //       id: true,
-        //       name: true,
-        //       email: true,
-        //       externalUserId: true,
-        //     },
-        //   },
-        // },
+
         select: {
           id: true,
           eventName: true,
@@ -213,7 +216,7 @@ class EventService {
     const items = hasMore ? events.slice(0, limit) : events;
 
     return {
-      events: items,
+      events: items as IEvent[],
       total,
       hasMore,
       page,
@@ -240,6 +243,8 @@ class EventService {
         : null,
       environment: event.environment,
       createdAt: event.createdAt?.toISOString(),
+      updatedAt: event.updatedAt,
+      deletedAt: event.deletedAt,
     };
   }
 }

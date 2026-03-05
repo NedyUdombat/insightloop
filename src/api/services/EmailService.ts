@@ -1,7 +1,7 @@
+import type React from "react";
 import { Resend } from "resend";
-import VerificationEmailTemplate from "@/components/templates/email/VerificationEmail";
 import PasswordResetTemplate from "@/components/templates/email/PasswordReset";
-import React from "react";
+import VerificationEmailTemplate from "@/components/templates/email/VerificationEmail";
 
 const DEFAULT_FROM = "InsightLoop <onboarding@resend.dev>";
 

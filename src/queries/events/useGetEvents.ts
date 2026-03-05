@@ -1,5 +1,5 @@
-import type { PublicEvent } from "@/api/types/IEvent";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import type { PublicEvent } from "@/api/types/IEvent";
 import { getEvents } from "./call";
 import type { GetEventsParams } from "./types";
 

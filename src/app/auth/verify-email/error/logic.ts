@@ -1,7 +1,7 @@
-import useResendVerification from "@/queries/auth/useResendVerification";
-import useLogout from "@/queries/auth/useLogout";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import useLogout from "@/queries/auth/useLogout";
+import useResendVerification from "@/queries/auth/useResendVerification";
 
 const RESEND_COOLDOWN_MS = 60_000;
 

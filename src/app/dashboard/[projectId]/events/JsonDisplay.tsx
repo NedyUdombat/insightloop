@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 interface JsonDisplayProps {
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export default function JsonDisplay({ data }: JsonDisplayProps) {
@@ -18,6 +18,7 @@ export default function JsonDisplay({ data }: JsonDisplayProps) {
   return (
     <div className="relative group">
       <button
+        type="button"
         onClick={handleCopy}
         className="absolute top-2 right-2 rounded-md bg-neutral-800 px-2.5 py-1.5 text-xs text-neutral-300 hover:bg-neutral-700 transition opacity-0 group-hover:opacity-100"
       >

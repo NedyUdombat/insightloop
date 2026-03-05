@@ -1,6 +1,6 @@
-import { IUser } from "@/api/types/IUser";
-import { IModel } from "@/api/types/IModel";
-import { TokenType } from "@/generated/prisma/enums";
+import type { IModel } from "@/api/types/IModel";
+import type { IUser } from "@/api/types/IUser";
+import type { TokenType } from "@/generated/prisma/enums";
 
 export interface IToken extends IModel {
   userId: string;

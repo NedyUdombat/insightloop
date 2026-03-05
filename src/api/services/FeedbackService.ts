@@ -1,6 +1,7 @@
+import type { PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { Environment, FeedbackStatus } from "@/generated/prisma/enums";
-import type { PrismaClient } from "@prisma/client/extension";
+import type { IFeedback } from "../types/IFeedback";
 
 class FeedbackService {
   async createFeedback({
@@ -9,13 +10,19 @@ class FeedbackService {
     message,
     environment,
     metadata,
+    feedbackTimestamp,
+    rating,
+    properties,
     tx,
   }: {
     projectId: string;
     endUserId: string;
     message: string;
     environment: Environment;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
+    feedbackTimestamp?: Date;
+    rating?: number;
+    properties?: Record<string, unknown>;
     tx?: PrismaClient;
   }) {
     const db = tx ?? prisma;
@@ -24,9 +31,12 @@ class FeedbackService {
       data: {
         projectId,
         endUserId,
-        metadata,
+        metadata: metadata || {},
+        properties: properties || {},
         message,
         environment,
+        feedbackTimestamp: feedbackTimestamp || new Date(),
+        rating,
       },
     });
   }
@@ -67,7 +77,12 @@ class FeedbackService {
               OR: [
                 { email: { contains: search, mode: "insensitive" as const } },
                 { name: { contains: search, mode: "insensitive" as const } },
-                { externalUserId: { contains: search, mode: "insensitive" as const } },
+                {
+                  externalUserId: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                  },
+                },
               ],
             },
           },
@@ -98,7 +113,7 @@ class FeedbackService {
     const hasMore = skip + feedbacks.length < total;
 
     return {
-      feedbacks,
+      feedbacks: feedbacks as unknown as IFeedback[],
       total,
       page,
       limit,
@@ -172,7 +187,7 @@ class FeedbackService {
     });
   }
 
-  serializeFeedback(feedback: any) {
+  serializeFeedback(feedback: IFeedback) {
     return {
       id: feedback.id,
       rating: feedback.rating,
@@ -183,6 +198,7 @@ class FeedbackService {
       properties: feedback.properties,
       metadata: feedback.metadata,
       environment: feedback.environment,
+      feedbackTimestamp: feedback.feedbackTimestamp.toISOString(),
       createdAt: feedback.createdAt.toISOString(),
       updatedAt: feedback.updatedAt.toISOString(),
       endUser: feedback.endUser

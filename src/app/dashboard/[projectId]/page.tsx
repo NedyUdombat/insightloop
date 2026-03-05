@@ -1,7 +1,7 @@
 "use client";
 import { useProject } from "./ProjectContext";
 import Dashboard from "./states/Dashboard";
-import EmptyEventsState from "./states/EmptyEventsState";
+import EmptyDataState from "./states/EmptyDataState";
 
 export default function DashboardPage() {
   const { project, isSingleProjectPending } = useProject();
@@ -20,8 +20,8 @@ export default function DashboardPage() {
     );
   }
 
-  if (project?.eventsCount === 0 && project) {
-    return <EmptyEventsState />;
+  if (project?.eventsCount === 0 && project?.feedbackCount === 0 && project) {
+    return <EmptyDataState />;
   }
 
   return <Dashboard />;

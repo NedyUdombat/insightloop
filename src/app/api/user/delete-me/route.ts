@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import UserService from "@/api/services/UserService";
+import { requireAuth } from "@/api/middleware/requireAuth";
+import AuditService from "@/api/services/AuditService";
 import AuthService from "@/api/services/AuthService";
 import RateLimitService from "@/api/services/RateLimitService";
-import AuditService from "@/api/services/AuditService";
-import { requireAuth } from "@/api/middleware/requireAuth";
+import UserService from "@/api/services/UserService";
 
 export const DELETE = requireAuth(async (req) => {
   const authService = new AuthService();

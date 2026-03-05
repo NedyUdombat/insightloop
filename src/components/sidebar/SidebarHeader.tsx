@@ -18,6 +18,7 @@ export function SidebarHeader({
         </span>
       )}
       <button
+        type="button"
         onClick={onToggle}
         className="text-neutral-400 hover:text-neutral-200 cursor-pointer"
       >

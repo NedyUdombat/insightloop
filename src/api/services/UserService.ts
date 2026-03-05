@@ -1,6 +1,7 @@
 import { prisma } from "@/api/lib/db";
 import type { IUser, PublicUser } from "@/api/types/IUser";
 import type { CreateUserInput } from "@/api/validators/user";
+import type { Prisma } from "@/generated/prisma/client";
 import type {
   UserInclude,
   UserWhereUniqueInput,
@@ -51,7 +52,7 @@ class UserService {
     data,
   }: {
     where: UserWhereUniqueInput;
-    data: any;
+    data: Prisma.UserUpdateInput;
   }) {
     return prisma.user.update({
       where,

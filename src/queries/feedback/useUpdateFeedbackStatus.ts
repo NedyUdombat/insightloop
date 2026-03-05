@@ -1,5 +1,5 @@
-import type { PublicFeedback } from "@/api/types/IFeedback";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { PublicFeedback } from "@/api/types/IFeedback";
 import { updateFeedbackStatus } from "./call";
 import type { UpdateFeedbackStatusParams } from "./types";
 
@@ -12,7 +12,7 @@ export function useUpdateFeedbackStatus() {
     UpdateFeedbackStatusParams
   >({
     mutationFn: updateFeedbackStatus,
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate and refetch feedbacks list
       queryClient.invalidateQueries({
         queryKey: ["feedbacks", variables.projectId],

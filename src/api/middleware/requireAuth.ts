@@ -1,5 +1,5 @@
-import AuthService from "@/api/services/AuthService";
 import { type NextRequest, NextResponse } from "next/server";
+import AuthService from "@/api/services/AuthService";
 import type { PublicUser } from "../types/IUser";
 
 export type AuthenticatedRequest = NextRequest & {

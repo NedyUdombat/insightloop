@@ -1,8 +1,8 @@
+import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import FeedbackService from "@/api/services/FeedbackService";
 import ProjectService from "@/api/services/ProjectService";
 import { Environment, FeedbackStatus } from "@/generated/prisma/enums";
-import { NextResponse } from "next/server";
 
 export const GET = requireAuth(async (req) => {
   try {
@@ -59,7 +59,9 @@ export const GET = requireAuth(async (req) => {
     // Validate environment if provided
     let environment: Environment | undefined;
     if (environmentParam) {
-      if (!Object.values(Environment).includes(environmentParam as Environment)) {
+      if (
+        !Object.values(Environment).includes(environmentParam as Environment)
+      ) {
         return NextResponse.json(
           { error: "Invalid environment parameter" },
           { status: 400 },
@@ -72,7 +74,7 @@ export const GET = requireAuth(async (req) => {
     let rating: number | undefined;
     if (ratingParam) {
       const ratingNum = parseInt(ratingParam, 10);
-      if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+      if (Number.isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
         return NextResponse.json(
           { error: "Invalid rating parameter (must be 1-5)" },
           { status: 400 },
@@ -109,10 +111,20 @@ export const GET = requireAuth(async (req) => {
       },
       { status: 200 },
     );
-  } catch (error: any) {
-    if (error.statusCode === 404) {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "statusCode" in error &&
+      error.statusCode === 404
+    ) {
       return NextResponse.json(
-        { error: error.message || "Project not found" },
+        {
+          error:
+            ("message" in error && typeof error.message === "string"
+              ? error.message
+              : null) || "Project not found",
+        },
         { status: 404 },
       );
     }

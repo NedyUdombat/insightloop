@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import UserService from "@/api/services/UserService";
+import { cookies } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
 import AuditService from "@/api/services/AuditService";
 import TokenService from "@/api/services/TokenService";
+import UserService from "@/api/services/UserService";
 import { TokenType } from "@/generated/prisma/enums";
-import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   const tokenService = new TokenService();

@@ -2,7 +2,7 @@
 
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
-import { Copy } from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import useSetupLogic, { type PackageManager, type SdkType } from "./logic";
 
@@ -12,6 +12,7 @@ export default function SetupPage() {
     setToastOpen,
     handleCopy,
     apiKey,
+    apiKeyHint,
     projectId,
     toastMessage,
     getInstallCommand,
@@ -23,6 +24,8 @@ export default function SetupPage() {
     setActivePm,
     count,
     refetch,
+    showApiKey,
+    setShowApiKey,
   } = useSetupLogic();
 
   return (
@@ -63,27 +66,38 @@ export default function SetupPage() {
 
                 <div className="relative mt-2">
                   <input
-                    value={apiKey || ""}
+                    value={showApiKey ? apiKey || "" : apiKeyHint || ""}
                     readOnly
-                    className="w-full rounded-md border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-neutral-300"
+                    className="w-full rounded-md border border-neutral-800 bg-neutral-950 px-4 py-3 pr-20 text-sm text-neutral-300"
                   />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleCopy({
-                        value: apiKey,
-                        toast: "API key copied to clipboard",
-                      })
-                    }
-                    className="absolute right-3 top-3 text-neutral-400 hover:text-white cursor-pointer"
-                  >
-                    <Copy size={16} />
-                  </button>
+                  <div className="absolute right-3 top-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      className="text-neutral-400 hover:text-white cursor-pointer"
+                      title={showApiKey ? "Hide API key" : "Show API key"}
+                    >
+                      {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopy({
+                          value: apiKey,
+                          toast: "API key copied to clipboard",
+                        })
+                      }
+                      className="text-neutral-400 hover:text-white cursor-pointer"
+                      title="Copy API key"
+                    >
+                      <Copy size={16} />
+                    </button>
+                  </div>
                 </div>
 
                 <p className="mt-2 text-xs text-red-500">
                   This key is shown once. Copy and store it securely. If lost,
-                  you’ll need to generate a new one.
+                  you'll need to generate a new one.
                 </p>
               </div>
 

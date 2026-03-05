@@ -1,3 +1,4 @@
+import { type NextRequest, NextResponse } from "next/server";
 import { getClientIp } from "@/api/lib/client";
 import AuditService from "@/api/services/AuditService";
 import EmailService from "@/api/services/EmailService";
@@ -5,7 +6,6 @@ import RateLimitService from "@/api/services/RateLimitService";
 import TokenService from "@/api/services/TokenService";
 import UserService from "@/api/services/UserService";
 import { EmailOnlySchema } from "@/api/validators/auth";
-import { type NextRequest, NextResponse } from "next/server";
 
 const GENERIC_RESPONSE = {
   success: true,

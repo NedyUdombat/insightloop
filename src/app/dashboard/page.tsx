@@ -1,9 +1,9 @@
 // app/dashboard/page.tsx
 
+import { redirect } from "next/navigation";
 import AuthService from "@/api/services/AuthService";
 import ProjectService from "@/api/services/ProjectService";
 import UserService from "@/api/services/UserService";
-import { redirect } from "next/navigation";
 
 export default async function DashboardRoot() {
   const authService = new AuthService();

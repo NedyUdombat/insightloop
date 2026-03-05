@@ -1,25 +1,26 @@
 "use client";
 
 import {
+  Bell,
   Book,
+  BookOpen,
+  CreditCard,
+  Loader2,
+  LogOut,
   Rocket,
   Settings,
-  BookOpen,
-  User,
-  CreditCard,
-  Bell,
-  LogOut,
   ShieldOff,
-  Loader2,
+  User,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import useLogout from "@/queries/auth/useLogout";
 import useLogoutAll from "@/queries/auth/useLogoutAll";
-import dynamic from "next/dynamic";
 
 const SidebarSection = dynamic(
-  () => import("./SidebarSection").then((mod) => ({ default: mod.SidebarSection })),
-  { ssr: false }
+  () =>
+    import("./SidebarSection").then((mod) => ({ default: mod.SidebarSection })),
+  { ssr: false },
 );
 
 export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
@@ -46,18 +47,27 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
       <div className="mx-4 my-3 h-px bg-neutral-800" />
 
       <SidebarSection icon={Book} label="Resources" collapsed={collapsed}>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
+        <a
+          href="/"
+          className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
+        >
           <Rocket size={18} />
           Get started
         </a>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
+        <a
+          href="/"
+          className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
+        >
           <BookOpen size={18} />
           API docs
         </a>
       </SidebarSection>
 
       <SidebarSection icon={Settings} label="Settings" collapsed={collapsed}>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
+        <a
+          href="/"
+          className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
+        >
           <User size={18} />
           Profile
         </a>
@@ -65,11 +75,15 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           <CreditCard size={18} />
           Billing
         </span>
-        <a className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer">
+        <a
+          href="/"
+          className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
+        >
           <Bell size={18} />
           Notification preferences
         </a>
         <button
+          type="button"
           onClick={handleLogout}
           disabled={isLoggingOut}
           className="w-full p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -82,6 +96,7 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           Logout
         </button>
         <button
+          type="button"
           onClick={handleLogoutAll}
           disabled={isLoggingOut}
           className="w-full p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"

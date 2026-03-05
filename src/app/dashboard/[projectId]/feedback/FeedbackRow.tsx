@@ -1,10 +1,11 @@
 "use client";
 
+import { format } from "date-fns";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { PublicFeedback } from "@/api/types/IFeedback";
 import type { FeedbackStatus } from "@/generated/prisma/enums";
 import { useUpdateFeedbackStatus } from "@/queries/feedback/useUpdateFeedbackStatus";
-import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
 import EnvironmentPill from "../events/EnvironmentPill";
 import { useProject } from "../ProjectContext";
 import StatusBadge from "./StatusBadge";
@@ -78,33 +79,9 @@ export default function FeedbackRow({ feedback }: FeedbackRowProps) {
         <td className="px-4 py-4">
           <div className="flex items-center text-neutral-500 group-hover:text-indigo-400 transition-all transform group-hover:scale-110">
             {isExpanded ? (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ChevronDown className="w-4 h-4" />
             ) : (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRight className="w-4 h-4" />
             )}
           </div>
         </td>
@@ -143,9 +120,7 @@ export default function FeedbackRow({ feedback }: FeedbackRowProps) {
         <td className="px-2 py-4">
           <div className="text-sm text-neutral-400">
             {format(
-              new Date(
-                feedback.metadata?.feedbackTimestamp || feedback.createdAt,
-              ),
+              new Date(feedback.feedbackTimestamp || feedback.createdAt),
               "dd/MM/YYY h:mm a",
             )}
           </div>

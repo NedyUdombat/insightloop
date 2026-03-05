@@ -1,9 +1,9 @@
 "use client";
 
+import { createContext, useContext, useState } from "react";
 import type { PublicEvent } from "@/api/types/IEvent";
 import type { Environment } from "@/generated/prisma/enums";
 import { useGetEvents } from "@/queries/events/useGetEvents";
-import { createContext, useContext, useState } from "react";
 import { useProject } from "../ProjectContext";
 
 interface EventsFilters {

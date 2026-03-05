@@ -1,8 +1,8 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
-import { Loader2 } from "lucide-react";
 import useRegisterAccount from "./logic";
 
 export default function RegisterPage() {

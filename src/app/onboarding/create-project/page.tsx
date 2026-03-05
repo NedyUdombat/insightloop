@@ -1,13 +1,16 @@
 "use client";
 
-import useGetProjects from "@/queries/project/useGetProjects";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import CreateProjectForm from "./CreateProjectForm";
+import CreateProjectForm from "@/components/project/CreateProjectForm";
+import useGetProjects from "@/queries/project/useGetProjects";
+import useCreateProjectLogic from "./logic";
 
 export default function CreateProjectPage() {
   const { replace } = useRouter();
   const { projects, isPending } = useGetProjects();
+  const { name, setName, loading, error, handleSubmit } =
+    useCreateProjectLogic();
 
   useEffect(() => {
     if (!isPending && projects.length > 0) {
@@ -24,8 +27,15 @@ export default function CreateProjectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center">
-      <CreateProjectForm />
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center px-6">
+      <CreateProjectForm
+        mode="onboarding"
+        name={name}
+        setName={setName}
+        loading={loading}
+        error={error}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

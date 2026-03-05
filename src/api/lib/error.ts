@@ -3,6 +3,6 @@ export function isUniqueConstraintError(err: unknown): boolean {
     typeof err === "object" &&
     err !== null &&
     "code" in err &&
-    (err as any).code === "P2002"
+    (err as { code: unknown }).code === "P2002"
   );
 }

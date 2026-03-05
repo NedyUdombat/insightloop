@@ -1,12 +1,12 @@
 // app/onboarding/context.tsx
 "use client";
 
-import type { PublicEvent } from "@/api/types/IEvent";
+import { createContext, useContext } from "react";
 import type { PublicProject } from "@/api/types/IProject";
-import useGetRecentEvents from "@/queries/events/useGetRecentEvents";
+import type { RecentActivity } from "@/queries/activity/types";
+import useGetRecentActivity from "@/queries/activity/useGetRecentActivity";
 import useGetProjectById from "@/queries/project/useGetProjectById";
 import useGetProjects from "@/queries/project/useGetProjects";
-import { createContext, useContext } from "react";
 
 interface ProjectContextType {
   projectId: string;
@@ -21,8 +21,8 @@ interface ProjectContextType {
   isProjectsError: boolean;
   projectsError: Error | null;
 
-  recentEvents: PublicEvent[];
-  isRecentEventsPending: boolean;
+  recentActivity: RecentActivity[];
+  isRecentActivityPending: boolean;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -46,8 +46,8 @@ export function ProjectProvider({
     isError: isProjectsError,
     error: projectsError,
   } = useGetProjects();
-  const { recentEvents, isPending: isRecentEventsPending } =
-    useGetRecentEvents(projectId);
+  const { recentActivity, isPending: isRecentActivityPending } =
+    useGetRecentActivity(projectId);
 
   return (
     <ProjectContext.Provider
@@ -64,8 +64,8 @@ export function ProjectProvider({
         isProjectsError,
         projectsError,
 
-        recentEvents,
-        isRecentEventsPending,
+        recentActivity,
+        isRecentActivityPending,
       }}
     >
       {children}

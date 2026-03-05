@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/api/lib/db";
 import AuditService from "@/api/services/AuditService";
+import AuthService from "@/api/services/AuthService";
 import TokenService from "@/api/services/TokenService";
 import { ResetPasswordSchema } from "@/api/validators/auth";
-import AuthService from "@/api/services/AuthService";
-import { prisma } from "@/api/lib/db";
 import { TokenType } from "@/generated/prisma/enums";
 
 export async function POST(req: NextRequest) {

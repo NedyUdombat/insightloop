@@ -1,6 +1,7 @@
 // app/onboarding/context.tsx
 "use client";
 
+import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
 
 interface OnboardingContextType {
@@ -10,7 +11,7 @@ interface OnboardingContextType {
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
-export function OnboardingProvider({ children }: any) {
+export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [apiKey, setApiKey] = useState<string | null>(null);
 
   return (

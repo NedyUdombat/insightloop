@@ -1,5 +1,6 @@
-import { Prisma } from "@prisma/client/extension";
+import type { Prisma } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
+import type { IEndUser } from "../types/IEndUser";
 
 class EndUserService {
   async resolveEndUser({
@@ -84,7 +85,7 @@ class EndUserService {
     traits?: {
       email?: string;
       name?: string;
-      [key: string]: any;
+      [key: string]: unknown;
     };
     tx?: Prisma.TransactionClient;
   }) {
@@ -123,7 +124,7 @@ class EndUserService {
     // Edge case: anonymousId and userId resolve to same EndUser (already identified)
     // Filter out the identified user itself
     const anonymousUsersToMerge = anonymousUsers.filter(
-      (u: any) => u.id !== identifiedUser.id,
+      (u: IEndUser) => u.id !== identifiedUser.id,
     );
 
     // If no anonymous users to merge, this is a no-op (idempotent)
@@ -135,7 +136,7 @@ class EndUserService {
     }
 
     // Step 3: Link all events from anonymous users to identified user
-    const anonymousUserIds = anonymousUsersToMerge.map((u: any) => u.id);
+    const anonymousUserIds = anonymousUsersToMerge.map((u: IEndUser) => u.id);
 
     const [eventsUpdated, feedbacksUpdated] = await Promise.all([
       db.event.updateMany({

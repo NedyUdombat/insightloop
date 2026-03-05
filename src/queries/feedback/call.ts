@@ -5,7 +5,16 @@ import type { GetFeedbacksParams, UpdateFeedbackStatusParams } from "./types";
 export async function getFeedbacks(
   params: GetFeedbacksParams,
 ): Promise<GenericResponse<PublicFeedback[]>> {
-  const { projectId, page, limit, search, status, environment, rating, endUserId } = params;
+  const {
+    projectId,
+    page,
+    limit,
+    search,
+    status,
+    environment,
+    rating,
+    endUserId,
+  } = params;
 
   const queryParams = new URLSearchParams();
   if (page) queryParams.append("page", page.toString());

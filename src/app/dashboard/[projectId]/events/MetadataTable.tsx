@@ -1,23 +1,25 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
 import { useState } from "react";
-import type { IEvent } from "@/api/types/IEvent";
+import type { PublicEvent } from "@/api/types/IEvent";
 
 interface MetadataTableProps {
-  event: IEvent;
+  event: PublicEvent;
 }
 
 export default function MetadataTable({ event }: MetadataTableProps) {
   const [copiedCell, setCopiedCell] = useState<string | null>(null);
 
-  const handleCopyCell = (key: string, value: any, cellId: string) => {
-    const textToCopy = typeof value === "string" ? value : JSON.stringify(value);
+  const handleCopyCell = (value: unknown, cellId: string) => {
+    const textToCopy =
+      typeof value === "string" ? value : JSON.stringify(value);
     navigator.clipboard.writeText(textToCopy);
     setCopiedCell(cellId);
     setTimeout(() => setCopiedCell(null), 2000);
   };
 
-  const renderValue = (value: any): string => {
+  const renderValue = (value: unknown): string => {
     if (value === null || value === undefined) {
       return "null";
     }
@@ -64,7 +66,7 @@ export default function MetadataTable({ event }: MetadataTableProps) {
                 <td className="px-4 py-2">
                   <button
                     type="button"
-                    onClick={() => handleCopyCell(key, key, keyId)}
+                    onClick={() => handleCopyCell(key, keyId)}
                     className="group relative w-full text-left flex items-center justify-between gap-2"
                   >
                     <div className="text-sm font-mono font-medium text-neutral-200 break-all">
@@ -72,33 +74,9 @@ export default function MetadataTable({ event }: MetadataTableProps) {
                     </div>
                     <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       {copiedCell === keyId ? (
-                        <svg
-                          className="w-4 h-4 text-green-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                        <Check className="w-4 h-4 text-green-400" />
                       ) : (
-                        <svg
-                          className="w-4 h-4 text-neutral-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
+                        <Copy className="w-4 h-4 text-neutral-400" />
                       )}
                     </div>
                   </button>
@@ -106,7 +84,7 @@ export default function MetadataTable({ event }: MetadataTableProps) {
                 <td className="px-4 py-2">
                   <button
                     type="button"
-                    onClick={() => handleCopyCell(key, value, valueId)}
+                    onClick={() => handleCopyCell(value, valueId)}
                     className="group relative w-full text-left flex items-center justify-between gap-2"
                   >
                     <div className="text-sm font-mono text-neutral-300 break-all whitespace-pre-wrap">
@@ -114,33 +92,9 @@ export default function MetadataTable({ event }: MetadataTableProps) {
                     </div>
                     <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       {copiedCell === valueId ? (
-                        <svg
-                          className="w-4 h-4 text-green-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                        <Check className="w-4 h-4 text-green-400" />
                       ) : (
-                        <svg
-                          className="w-4 h-4 text-neutral-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
+                        <Copy className="w-4 h-4 text-neutral-400" />
                       )}
                     </div>
                   </button>

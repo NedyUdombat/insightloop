@@ -1,7 +1,7 @@
+import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import EventService from "@/api/services/EventService";
 import ProjectService from "@/api/services/ProjectService";
-import { NextResponse } from "next/server";
 
 export const GET = requireAuth(async (req) => {
   try {
@@ -29,11 +29,21 @@ export const GET = requireAuth(async (req) => {
     });
 
     return NextResponse.json({ data: count }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle errors from assertOwnership
-    if (error.statusCode === 404) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "statusCode" in error &&
+      error.statusCode === 404
+    ) {
       return NextResponse.json(
-        { error: error.message || "Project not found" },
+        {
+          error:
+            ("message" in error && typeof error.message === "string"
+              ? error.message
+              : null) || "Project not found",
+        },
         { status: 404 },
       );
     }

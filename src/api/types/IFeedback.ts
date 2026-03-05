@@ -10,10 +10,11 @@ export interface IFeedback extends IModel {
   message: string; // Main feedback message
   additionalInfo: string | null; // Any additional information
   status: FeedbackStatus;
-  properties: Record<string, any> | null; // Developer-provided custom properties
-  metadata: Record<string, any> | null; // System-generated metadata (location, device, IP, host, URL, etc.)
+  properties: Record<string, unknown> | null; // Developer-provided custom properties
+  metadata: Record<string, unknown> | null; // System-generated metadata (location, device, IP, host, URL, etc.)
   environment: Environment;
-  endUser: IEndUser | null;
+  endUser?: IEndUser | null;
+  feedbackTimestamp: Date | null;
 }
 
 export interface PublicFeedback {
@@ -23,11 +24,12 @@ export interface PublicFeedback {
   message: string; // Main feedback message
   additionalInfo: string | null; // Additional information
   status: FeedbackStatus;
-  properties: Record<string, any> | null; // Developer-provided custom properties
-  metadata: Record<string, any> | null; // System-generated metadata
+  properties: Record<string, unknown> | null; // Developer-provided custom properties
+  metadata: Record<string, unknown> | null; // System-generated metadata
   createdAt: string;
   updatedAt: string;
   endUser: IEndUser | null;
   endUserId: string | null;
   environment: Environment;
+  feedbackTimestamp: Date | null;
 }

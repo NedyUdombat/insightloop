@@ -1,8 +1,8 @@
 "use client";
 
-import Tooltip from "@/components/tooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Tooltip from "@/components/tooltip";
 
 type NavItemProps = {
   icon: React.ElementType;

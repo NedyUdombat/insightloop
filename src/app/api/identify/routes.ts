@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/api/lib/db";
 import { requireApiKey } from "@/api/middleware/requireApiKey";
+import EndUserService from "@/api/services/EndUserService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { IdentifySchema } from "@/api/validators/identify";
-import EndUserService from "@/api/services/EndUserService";
-import { prisma } from "@/api/lib/db";
 
 const MAX_PAYLOAD_BYTES = 16 * 1024; // 16KB - identify should be small
 

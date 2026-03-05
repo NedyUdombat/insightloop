@@ -16,6 +16,7 @@ export function SidebarSection({
     <Popover.Root>
       <Popover.Trigger asChild>
         <button
+          type="button"
           className="
             w-full flex items-center justify-between
             px-3 py-2 rounded-md text-sm

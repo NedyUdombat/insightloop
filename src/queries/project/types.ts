@@ -3,6 +3,12 @@ import type { Environment } from "@/generated/prisma/enums";
 
 export interface CreateProjectPayload {
   name: string;
+  emailNotifications?: boolean;
+  eventAlerts?: boolean;
+  weeklyReports?: boolean;
+  autoArchive?: boolean;
+  retentionDays?: number;
+  defaultEnvironment?: Environment;
 }
 
 export interface CreateProjectResponse {
@@ -22,8 +28,8 @@ export interface GetProjectFirstEventResponse {
   eventName: string;
   eventTimestamp: Date;
   endUserId: string;
-  metadata: Record<string, any> | null;
-  properties: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
+  properties: Record<string, unknown> | null;
   projectId: string;
   createdAt: Date;
   updatedAt: Date;

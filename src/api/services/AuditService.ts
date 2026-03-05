@@ -1,6 +1,6 @@
+import type { PrismaClient } from "@prisma/client/extension";
 import { getClientMeta } from "@/api/lib/client";
 import { prisma } from "@/api/lib/db";
-import { PrismaClient } from "@prisma/client/extension";
 
 class AuditService {
   async audit({
@@ -11,7 +11,7 @@ class AuditService {
   }: {
     action: string;
     userId: string;
-    metadata: any | null;
+    metadata: Record<string, unknown> | null;
     tx?: PrismaClient;
   }) {
     const db = tx ?? prisma;

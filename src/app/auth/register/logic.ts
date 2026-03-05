@@ -1,7 +1,7 @@
-import useRegister from "@/queries/auth/useRegister";
-import { isPasswordStrong } from "@/components/auth/PasswordStrength";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { isPasswordStrong } from "@/components/auth/PasswordStrength";
+import useRegister from "@/queries/auth/useRegister";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

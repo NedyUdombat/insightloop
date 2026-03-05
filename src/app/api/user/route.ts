@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { UpdateUserInput, UpdateUserSchema } from "@/api/validators/user";
-import UserService from "@/api/services/UserService";
-import { PublicUser } from "@/api/types/IUser";
-import AuditService from "@/api/services/AuditService";
 import { requireAuth } from "@/api/middleware/requireAuth";
+import AuditService from "@/api/services/AuditService";
+import UserService from "@/api/services/UserService";
+import type { PublicUser } from "@/api/types/IUser";
+import { type UpdateUserInput, UpdateUserSchema } from "@/api/validators/user";
 
 export const PATCH = requireAuth(async (req) => {
   const userService = new UserService();

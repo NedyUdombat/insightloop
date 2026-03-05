@@ -1,9 +1,9 @@
 "use client";
 
-import type { PublicProject } from "@/api/types/IProject";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, Plus } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import type { PublicProject } from "@/api/types/IProject";
 import { ProjectList } from "./ProjectList";
 
 interface ProjectSwitcherProps {
@@ -12,7 +12,7 @@ interface ProjectSwitcherProps {
 }
 
 const getCreateProjectRoute = (hasProjects: boolean): string => {
-  return hasProjects ? "/projects/create" : "/onboarding/create-project";
+  return hasProjects ? "/projects/new" : "/onboarding/create-project";
 };
 
 export default function ProjectSwitcher({

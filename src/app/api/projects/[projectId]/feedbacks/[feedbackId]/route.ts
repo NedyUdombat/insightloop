@@ -1,7 +1,7 @@
+import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import FeedbackService from "@/api/services/FeedbackService";
 import ProjectService from "@/api/services/ProjectService";
-import { NextResponse } from "next/server";
 import { FeedbackStatus } from "@/generated/prisma/enums";
 
 export const GET = requireAuth(async (req) => {
@@ -41,10 +41,20 @@ export const GET = requireAuth(async (req) => {
       { data: feedbackService.serializeFeedback(feedback) },
       { status: 200 },
     );
-  } catch (error: any) {
-    if (error.statusCode === 404) {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "statusCode" in error &&
+      error.statusCode === 404
+    ) {
       return NextResponse.json(
-        { error: error.message || "Project not found" },
+        {
+          error:
+            ("message" in error && typeof error.message === "string"
+              ? error.message
+              : null) || "Project not found",
+        },
         { status: 404 },
       );
     }
@@ -99,8 +109,8 @@ export const PATCH = requireAuth(async (req) => {
       { data: feedbackService.serializeFeedback(updatedFeedback) },
       { status: 200 },
     );
-  } catch (error: any) {
-    if (error.message === "Feedback not found") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Feedback not found") {
       return NextResponse.json(
         { error: "Feedback not found" },
         { status: 404 },

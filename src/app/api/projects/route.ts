@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getClientIp } from "@/api/lib/client";
 import { prisma } from "@/api/lib/db";
 import { parsePagination } from "@/api/lib/pagination";
@@ -8,7 +9,6 @@ import ProjectService from "@/api/services/ProjectService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { CreateProjectSchema } from "@/api/validators/project";
 import { ApiKeyType, Environment } from "@/generated/prisma/enums";
-import { NextResponse } from "next/server";
 
 const DEFAULT_API_KEY_NAME = "Default";
 
@@ -40,15 +40,23 @@ export const POST = requireAuth(async (req) => {
     );
   }
 
-  const { name } = validatedData.data;
+  const {
+    name,
+    emailNotifications,
+    eventAlerts,
+    weeklyReports,
+    autoArchive,
+    retentionDays,
+    defaultEnvironment,
+  } = validatedData.data;
 
   // Check if user can create more projects
   try {
     await projectService.canCreateProject({
       userId: user.id,
     });
-  } catch (err: any) {
-    if (err.message === "PROJECT_LIMIT_REACHED") {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === "PROJECT_LIMIT_REACHED") {
       return NextResponse.json(
         {
           error:
@@ -102,6 +110,12 @@ export const POST = requireAuth(async (req) => {
       const project = await projectService.createProject({
         name,
         ownerId: req.user.id,
+        emailNotifications,
+        eventAlerts,
+        weeklyReports,
+        autoArchive,
+        retentionDays,
+        defaultEnvironment,
         tx,
       });
 
@@ -157,9 +171,14 @@ export const POST = requireAuth(async (req) => {
         },
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Handle unique constraint violation
-    if (err.code === "P2002") {
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      err.code === "P2002"
+    ) {
       return NextResponse.json(
         { error: "Project already exists." },
         { status: 409 },

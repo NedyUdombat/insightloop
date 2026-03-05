@@ -1,5 +1,5 @@
-import useForgotPassword from "@/queries/auth/useForgotPassword";
 import { useMemo, useState } from "react";
+import useForgotPassword from "@/queries/auth/useForgotPassword";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

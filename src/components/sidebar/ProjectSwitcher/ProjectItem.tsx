@@ -1,5 +1,5 @@
-import type { PublicProject } from "@/api/types/IProject";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import type { PublicProject } from "@/api/types/IProject";
 
 export function ProjectItem({
   project,

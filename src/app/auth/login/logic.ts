@@ -1,6 +1,6 @@
-import useLogin from "@/queries/auth/useLogin";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import useLogin from "@/queries/auth/useLogin";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

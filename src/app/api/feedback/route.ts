@@ -1,10 +1,10 @@
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
 import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
 import FeedbackService from "@/api/services/FeedbackService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { SDKFeedbackSchema } from "@/api/validators/feedback";
-import { type NextRequest, NextResponse } from "next/server";
 
 const MAX_PAYLOAD_BYTES = 24 * 1024; // feedback should be smaller
 
@@ -69,11 +69,8 @@ export async function POST(req: NextRequest) {
         tx,
       });
 
-      // Build metadata from SDK fields (rating, properties, timestamp, etc.)
+      // Build metadata from SDK fields
       const metadata = {
-        rating: feedback.rating,
-        properties: feedback.properties,
-        feedbackTimestamp: feedback.feedbackTimestamp,
         sdkFeedbackId: feedback.id, // Store SDK-generated ID for reference
       };
 
@@ -83,6 +80,11 @@ export async function POST(req: NextRequest) {
         message: feedback.text, // SDK uses "text", backend uses "message"
         environment: auth.apiKey.environment,
         metadata,
+        feedbackTimestamp: feedback.feedbackTimestamp
+          ? new Date(feedback.feedbackTimestamp)
+          : new Date(),
+        rating: feedback.rating,
+        properties: feedback.properties,
         tx,
       });
     });

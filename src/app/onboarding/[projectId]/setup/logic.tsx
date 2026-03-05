@@ -1,9 +1,9 @@
 "use client";
 
-import useCountProjectEvents from "@/queries/project/useCountProjectEvents";
-import useGetProjectById from "@/queries/project/useGetProjectById";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import useCountProjectEvents from "@/queries/project/useCountProjectEvents";
+import useGetProjectById from "@/queries/project/useGetProjectById";
 
 export type SdkType = "browser" | "node" | "react-native";
 export type PackageManager = "npm" | "yarn" | "pnpm" | "bun";
@@ -15,14 +15,11 @@ const useSetupLogic = () => {
   const [activePm, setActivePm] = useState<PackageManager>("npm");
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("Copied to clipboard!");
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const projectId = (params.projectId as string) || "123";
   const { project, isPending, isError } = useGetProjectById(projectId);
-  const {
-    count,
-    isPending: isCountPending,
-    refetch,
-  } = useCountProjectEvents(projectId);
+  const { count, refetch } = useCountProjectEvents(projectId);
 
   // 🔹 INSTALL COMMAND
   const getInstallCommand = () => {
@@ -58,7 +55,6 @@ const useSetupLogic = () => {
 
   useEffect(() => {
     if (Number(count) > 0) {
-      console.log("Events have been tracked! Redirecting to success page...");
       setTimeout(() => {
         router.push(`/onboarding/${projectId}/success`);
       }, 1000);
@@ -88,6 +84,7 @@ const useSetupLogic = () => {
     isPending,
     isError,
     apiKey: project?.apiKeys[0]?.keyValue,
+    apiKeyHint: project?.apiKeys[0]?.keyHint,
     toastMessage,
     getInstallCommand,
     getInitializeCode,
@@ -98,6 +95,8 @@ const useSetupLogic = () => {
     setActivePm,
     count,
     refetch,
+    showApiKey,
+    setShowApiKey,
   };
 };
 

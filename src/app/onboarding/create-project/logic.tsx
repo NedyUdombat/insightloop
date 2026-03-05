@@ -1,7 +1,7 @@
-import useCreateProject from "@/queries/project/useCreateProject";
-import useGetProjects from "@/queries/project/useGetProjects";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import useCreateProject from "@/queries/project/useCreateProject";
+import useGetProjects from "@/queries/project/useGetProjects";
 import { useOnboarding } from "../OnboardingContext";
 
 const useCreateProjectLogic = () => {
@@ -43,8 +43,8 @@ const useCreateProjectLogic = () => {
           },
         },
       );
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }

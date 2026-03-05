@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { AuthForm } from "@/components/auth/AuthForm";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { AuthForm } from "@/components/auth/AuthForm";
 import useLoginAccount from "./logic";
 
 function LoginContent() {

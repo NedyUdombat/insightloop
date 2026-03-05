@@ -1,8 +1,9 @@
 "use client";
 
-import { useEvents } from "./EventsContext";
+import { Search, X } from "lucide-react";
 import { useState } from "react";
 import type { Environment } from "@/generated/prisma/enums";
+import { useEvents } from "./EventsContext";
 
 export default function EventsFilters() {
   const { filters, setFilters, pagination, setPagination } = useEvents();
@@ -35,26 +36,15 @@ export default function EventsFilters() {
     setPagination({ ...pagination, page: 1 });
   };
 
-  const hasActiveFilters = filters.search || filters.environment || filters.endUserId;
+  const hasActiveFilters =
+    filters.search || filters.environment || filters.endUserId;
 
   return (
     <div className="rounded-lg border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl p-4">
       <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
         {/* Search */}
         <div className="relative flex-1">
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
           <input
             id="search"
             type="text"
@@ -98,19 +88,7 @@ export default function EventsFilters() {
             onClick={clearFilters}
             className="text-xs text-neutral-400 hover:text-neutral-200 transition flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-neutral-800/60"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="w-4 h-4" />
             Clear
           </button>
         )}

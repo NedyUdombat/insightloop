@@ -1,5 +1,5 @@
-import { type IModel } from "./IModel";
-import { IUser } from "@/api/types/IUser";
+import type { IUser } from "@/api/types/IUser";
+import type { IModel } from "./IModel";
 
 export interface IAuditLog extends IModel {
   userId: string;
@@ -7,5 +7,5 @@ export interface IAuditLog extends IModel {
   action: string;
   userAgent: string | null;
   ip: string | null;
-  metadata: any | null;
+  metadata: Record<string, unknown> | null;
 }

@@ -1,5 +1,5 @@
-import type { PublicFeedback } from "@/api/types/IFeedback";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import type { PublicFeedback } from "@/api/types/IFeedback";
 import { getFeedbacks } from "./call";
 import type { GetFeedbacksParams } from "./types";
 

@@ -1,13 +1,13 @@
 "use client";
 
-import FeedbackRow from "./FeedbackRow";
 import { useFeedback } from "./FeedbackContext";
+import FeedbackRow from "./FeedbackRow";
 
 export default function FeedbackTable() {
-  const { feedbacks, isLoading, error, pagination, setPagination } =
+  const { feedbacks, isPending, error, pagination, setPagination } =
     useFeedback();
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 backdrop-blur p-12">
         <div className="flex items-center justify-center">

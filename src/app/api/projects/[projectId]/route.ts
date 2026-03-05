@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
@@ -7,7 +8,6 @@ import {
   type UpdateProjectInput,
   UpdateProjectSchema,
 } from "@/api/validators/project";
-import { NextResponse } from "next/server";
 
 export const GET = requireAuth(async (req) => {
   const projectService = new ProjectService();
@@ -55,7 +55,7 @@ export const GET = requireAuth(async (req) => {
       _count: {
         select: {
           events: true,
-          feedbacks: true
+          feedbacks: true,
         },
       },
     },
@@ -165,20 +165,33 @@ export const PATCH = requireAuth(async (req) => {
       return updated;
     });
 
-    console.log({ updatedProject });
-
     const serialized = projectService.serializeProject(updatedProject);
 
     return NextResponse.json({ data: serialized }, { status: 200 });
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "statusCode" in error &&
+      typeof error.statusCode === "number"
+    ) {
       return NextResponse.json(
-        { error: error.message },
+        {
+          error:
+            "message" in error && typeof error.message === "string"
+              ? error.message
+              : "An error occurred",
+        },
         { status: error.statusCode },
       );
     }
 
-    if (error.code === "P2002") {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json(
         { error: "Project name already exists." },
         { status: 409 },
@@ -233,10 +246,20 @@ export const DELETE = requireAuth(async (req) => {
     });
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (err: any) {
-    if (err.statusCode) {
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "statusCode" in err &&
+      typeof err.statusCode === "number"
+    ) {
       return NextResponse.json(
-        { error: err.message },
+        {
+          error:
+            "message" in err && typeof err.message === "string"
+              ? err.message
+              : "An error occurred",
+        },
         { status: err.statusCode },
       );
     }

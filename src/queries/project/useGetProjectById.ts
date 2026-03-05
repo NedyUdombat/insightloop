@@ -1,5 +1,5 @@
-import type { PublicProject } from "@/api/types/IProject";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import type { PublicProject } from "@/api/types/IProject";
 import { getProjectById } from "./call";
 
 const useGetProjectById = (projectId: string) => {
