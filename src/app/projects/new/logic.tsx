@@ -6,9 +6,10 @@ import type { Environment } from "@/generated/prisma/enums";
 import useCreateProject from "@/queries/project/useCreateProject";
 
 interface ProjectSettings {
-  emailNotifications: boolean;
-  eventAlerts: boolean;
-  weeklyReports: boolean;
+  eventNotifications: boolean;
+  feedbackNotifications: boolean;
+  systemNotifications: boolean;
+  securityNotifications: boolean;
   autoArchive: boolean;
   retentionDays: number;
   defaultEnvironment: Environment;
@@ -21,9 +22,10 @@ const useCreateProjectLogic = () => {
 
   // Settings state
   const [settings, setSettings] = useState<ProjectSettings>({
-    emailNotifications: true,
-    eventAlerts: true,
-    weeklyReports: false,
+    eventNotifications: true,
+    feedbackNotifications: true,
+    systemNotifications: true,
+    securityNotifications: true,
     autoArchive: false,
     retentionDays: 30,
     defaultEnvironment: "PRODUCTION" as Environment,
@@ -53,9 +55,10 @@ const useCreateProjectLogic = () => {
       createProject(
         {
           name,
-          emailNotifications: settings.emailNotifications,
-          eventAlerts: settings.eventAlerts,
-          weeklyReports: settings.weeklyReports,
+          eventNotifications: settings.eventNotifications,
+          feedbackNotifications: settings.feedbackNotifications,
+          systemNotifications: settings.systemNotifications,
+          securityNotifications: settings.securityNotifications,
           autoArchive: settings.autoArchive,
           retentionDays: settings.retentionDays,
           defaultEnvironment: settings.defaultEnvironment,

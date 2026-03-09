@@ -1,7 +1,7 @@
 export function getInitialsFromName(
   email: string,
-  firstname?: string,
-  lastname?: string,
+  firstname?: string | null,
+  lastname?: string | null,
 ): string {
   // Try to get initials from firstname and lastname
   if (firstname && lastname) {

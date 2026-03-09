@@ -41,9 +41,16 @@ class UserService {
       email: user.email,
       role: user.role,
       emailVerified: user.emailVerified,
+      emailVerifiedAt: user.emailVerifiedAt,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       projects: user.projects || [],
+      lastProjectId: user.lastProjectId,
+      globalNotificationsEnabled: user.globalNotificationsEnabled,
+      notificationChannels: user.notificationChannels,
+      quietHoursStart: user.quietHoursStart,
+      quietHoursEnd: user.quietHoursEnd,
+      digestFrequency: user.digestFrequency,
     } as PublicUser;
   }
 

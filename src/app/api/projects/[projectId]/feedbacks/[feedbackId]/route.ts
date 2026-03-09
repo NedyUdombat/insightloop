@@ -117,9 +117,9 @@ export const PATCH = requireAuth(async (req) => {
       );
     }
 
-    if (error.statusCode === 404) {
+    if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 404) {
       return NextResponse.json(
-        { error: error.message || "Project not found" },
+        { error: ('message' in error && typeof error.message === 'string' ? error.message : "Project not found") },
         { status: 404 },
       );
     }

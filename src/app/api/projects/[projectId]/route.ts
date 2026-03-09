@@ -28,9 +28,10 @@ export const GET = requireAuth(async (req) => {
       id: true,
       name: true,
       ownerId: true,
-      emailNotifications: true,
-      eventAlerts: true,
-      weeklyReports: true,
+      eventNotifications: true,
+      feedbackNotifications: true,
+      systemNotifications: true,
+      securityNotifications: true,
       autoArchive: true,
       retentionDays: true,
       defaultEnvironment: true,
@@ -99,14 +100,17 @@ export const PATCH = requireAuth(async (req) => {
   if (validatedProjectData.name !== undefined) {
     updateData.name = validatedProjectData.name;
   }
-  if (validatedProjectData.emailNotifications !== undefined) {
-    updateData.emailNotifications = validatedProjectData.emailNotifications;
+  if (validatedProjectData.eventNotifications !== undefined) {
+    updateData.eventNotifications = validatedProjectData.eventNotifications;
   }
-  if (validatedProjectData.eventAlerts !== undefined) {
-    updateData.eventAlerts = validatedProjectData.eventAlerts;
+  if (validatedProjectData.feedbackNotifications !== undefined) {
+    updateData.feedbackNotifications = validatedProjectData.feedbackNotifications;
   }
-  if (validatedProjectData.weeklyReports !== undefined) {
-    updateData.weeklyReports = validatedProjectData.weeklyReports;
+  if (validatedProjectData.systemNotifications !== undefined) {
+    updateData.systemNotifications = validatedProjectData.systemNotifications;
+  }
+  if (validatedProjectData.securityNotifications !== undefined) {
+    updateData.securityNotifications = validatedProjectData.securityNotifications;
   }
   if (validatedProjectData.autoArchive !== undefined) {
     updateData.autoArchive = validatedProjectData.autoArchive;

@@ -7,12 +7,18 @@ export interface IProject extends IModel {
   name: string;
   owner: IUser | null;
   ownerId: string;
-  emailNotifications: boolean;
-  eventAlerts: boolean;
-  weeklyReports: boolean;
-  autoArchive: boolean;
+
+  // Notification Preferences (what notifications to generate)
+  eventNotifications: boolean;
+  feedbackNotifications: boolean;
+  systemNotifications: boolean;
+  securityNotifications: boolean;
+
+  // Project Settings
+  autoArchive: boolean; 
   retentionDays: number;
   defaultEnvironment: Environment;
+
   apiKeys: IApiKey[];
   _count: {
     events: number;
@@ -24,12 +30,18 @@ export interface PublicProject {
   id: string;
   name: string;
   ownerId: string;
-  emailNotifications: boolean;
-  eventAlerts: boolean;
-  weeklyReports: boolean;
+
+  // Notification Preferences
+  eventNotifications: boolean;
+  feedbackNotifications: boolean;
+  systemNotifications: boolean;
+  securityNotifications: boolean;
+
+  // Project Settings
   autoArchive: boolean;
   retentionDays: number;
   defaultEnvironment: Environment;
+
   createdAt: Date;
   updatedAt: Date;
   apiKeys: IApiKey[];

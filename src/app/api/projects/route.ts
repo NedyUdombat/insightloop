@@ -42,9 +42,10 @@ export const POST = requireAuth(async (req) => {
 
   const {
     name,
-    emailNotifications,
-    eventAlerts,
-    weeklyReports,
+    eventNotifications,
+    feedbackNotifications,
+    systemNotifications,
+    securityNotifications,
     autoArchive,
     retentionDays,
     defaultEnvironment,
@@ -95,7 +96,6 @@ export const POST = requireAuth(async (req) => {
     );
   }
   const keyType = ApiKeyType.INGESTION;
-  const keyEnv = Environment.DEVELOPMENT;
 
   // Create project with API key
   try {
@@ -103,16 +103,17 @@ export const POST = requireAuth(async (req) => {
       // Generate API key
       const { raw, hash, keyHint } = await apiKeyService.generateApiKey({
         type: keyType,
-        environment: keyEnv,
+        environment: defaultEnvironment,
       });
 
       // Create project
       const project = await projectService.createProject({
         name,
         ownerId: req.user.id,
-        emailNotifications,
-        eventAlerts,
-        weeklyReports,
+        eventNotifications,
+        feedbackNotifications,
+        systemNotifications,
+        securityNotifications,
         autoArchive,
         retentionDays,
         defaultEnvironment,
@@ -127,7 +128,7 @@ export const POST = requireAuth(async (req) => {
         keyHint,
         createdById: req.user.id,
         type: keyType,
-        environment: keyEnv,
+        environment: defaultEnvironment,
         tx,
         keyValue: raw,
       });
@@ -148,7 +149,7 @@ export const POST = requireAuth(async (req) => {
           projectId: project.id,
           apiKeyName: name,
           apiKeyType: keyType,
-          environment: keyEnv,
+          environment: defaultEnvironment,
           keyHint,
         },
         tx,
@@ -165,7 +166,7 @@ export const POST = requireAuth(async (req) => {
         project: publicProject,
         apiKey: {
           value: result.raw,
-          environment: keyEnv,
+          environment: defaultEnvironment,
           type: keyType,
           name: DEFAULT_API_KEY_NAME,
         },

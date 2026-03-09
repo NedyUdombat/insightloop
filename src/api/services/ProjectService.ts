@@ -14,9 +14,10 @@ class ProjectService {
   async createProject({
     name,
     ownerId,
-    emailNotifications,
-    eventAlerts,
-    weeklyReports,
+    eventNotifications,
+    feedbackNotifications,
+    systemNotifications,
+    securityNotifications,
     autoArchive,
     retentionDays,
     defaultEnvironment,
@@ -24,9 +25,10 @@ class ProjectService {
   }: {
     name: string;
     ownerId: string;
-    emailNotifications?: boolean;
-    eventAlerts?: boolean;
-    weeklyReports?: boolean;
+    eventNotifications?: boolean;
+    feedbackNotifications?: boolean;
+    systemNotifications?: boolean;
+    securityNotifications?: boolean;
     autoArchive?: boolean;
     retentionDays?: number;
     defaultEnvironment?: string;
@@ -37,9 +39,10 @@ class ProjectService {
       data: {
         name,
         ownerId,
-        emailNotifications,
-        eventAlerts,
-        weeklyReports,
+        eventNotifications,
+        feedbackNotifications,
+        systemNotifications,
+        securityNotifications,
         autoArchive,
         retentionDays,
         defaultEnvironment,
@@ -197,9 +200,10 @@ class ProjectService {
       id: project.id,
       name: project.name,
       ownerId: project.ownerId,
-      emailNotifications: project.emailNotifications,
-      eventAlerts: project.eventAlerts,
-      weeklyReports: project.weeklyReports,
+      eventNotifications: project.eventNotifications,
+      feedbackNotifications: project.feedbackNotifications,
+      systemNotifications: project.systemNotifications,
+      securityNotifications: project.securityNotifications,
       autoArchive: project.autoArchive,
       retentionDays: project.retentionDays,
       defaultEnvironment: project.defaultEnvironment,

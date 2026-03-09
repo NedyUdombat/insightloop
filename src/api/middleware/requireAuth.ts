@@ -37,11 +37,17 @@ export function requireAuth<
         email: user.email,
         role: user.role,
         emailVerified: user.emailVerified,
+        emailVerifiedAt: user.emailVerifiedAt,
         firstname: user.firstname,
         lastname: user.lastname,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         lastProjectId: user.lastProjectId,
+        globalNotificationsEnabled: user.globalNotificationsEnabled,
+        notificationChannels: user.notificationChannels,
+        quietHoursStart: user.quietHoursStart,
+        quietHoursEnd: user.quietHoursEnd,
+        digestFrequency: user.digestFrequency,
       };
       (req as AuthenticatedRequest).session = {
         id: session.id,

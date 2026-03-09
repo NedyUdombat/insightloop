@@ -3,9 +3,10 @@ import type { Environment } from "@/generated/prisma/enums";
 
 export interface CreateProjectPayload {
   name: string;
-  emailNotifications?: boolean;
-  eventAlerts?: boolean;
-  weeklyReports?: boolean;
+  eventNotifications?: boolean;
+  feedbackNotifications?: boolean;
+  systemNotifications?: boolean;
+  securityNotifications?: boolean;
   autoArchive?: boolean;
   retentionDays?: number;
   defaultEnvironment?: Environment;
@@ -39,9 +40,10 @@ export interface GetProjectFirstEventResponse {
 export interface UpdateProjectPayload {
   name: string;
   preferences?: {
-    emailNotifications: boolean;
-    eventAlerts: boolean;
-    weeklyReports: boolean;
+    eventNotifications: boolean;
+    feedbackNotifications: boolean;
+    systemNotifications: boolean;
+    securityNotifications: boolean;
     autoArchive: boolean;
     retentionDays: number;
     defaultEnvironment: Environment;

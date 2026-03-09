@@ -3,6 +3,12 @@ import {
   Environment,
   FeedbackStatus,
   PrismaClient,
+  ApiKeyType,
+  NotificationType,
+  NotificationStatus,
+  NotificationChannel,
+  DigestFrequency,
+  UserRole,
 } from "@/generated/prisma/client";
 import "dotenv/config";
 import { Pool } from "pg";
@@ -43,10 +49,11 @@ async function main() {
       data: {
         name: "E-Commerce Platform",
         ownerId: user.id,
-        defaultEnvironment: "DEVELOPMENT",
-        emailNotifications: true,
-        eventAlerts: true,
-        weeklyReports: true,
+        defaultEnvironment: Environment.DEVELOPMENT,
+        eventNotifications: true,
+        feedbackNotifications: true,
+        systemNotifications: true,
+        securityNotifications: true,
         autoArchive: false,
         retentionDays: 90,
       },
@@ -55,28 +62,80 @@ async function main() {
 
     // 3. Seed Ingestion API Key for Development
     const crypto = await import("node:crypto");
-    const prefix = "il_pk_test";
-    const entropy = crypto.randomBytes(32).toString("hex");
-    const apiKeyValue = `${prefix}_${entropy}`;
-    const apiKeyHash = crypto
-      .createHash("sha256")
-      .update(apiKeyValue)
-      .digest("hex");
-    const keyHint = `${prefix}_${entropy.slice(0, 4)}...${entropy.slice(-4)}`;
 
-    const apiKey = await tx.apiKey.create({
+    // Development Ingestion Key
+    const devPrefix = "il_pk_dev";
+    const devEntropy = crypto.randomBytes(32).toString("hex");
+    const devApiKeyValue = `${devPrefix}_${devEntropy}`;
+    const devApiKeyHash = crypto
+      .createHash("sha256")
+      .update(devApiKeyValue)
+      .digest("hex");
+    const devKeyHint = `${devPrefix}_${devEntropy.slice(0, 4)}...${devEntropy.slice(-4)}`;
+
+    const devApiKey = await tx.apiKey.create({
       data: {
-        name: "Development API Key",
-        keyValue: apiKeyValue,
-        keyHash: apiKeyHash,
-        keyHint: keyHint,
-        type: "INGESTION",
-        environment: "DEVELOPMENT",
+        name: "Development Ingestion Key",
+        keyValue: devApiKeyValue,
+        keyHash: devApiKeyHash,
+        keyHint: devKeyHint,
+        type: ApiKeyType.INGESTION,
+        environment: Environment.DEVELOPMENT,
         projectId: project.id,
         createdById: user.id,
       },
     });
-    console.log("API Key seeded:", apiKey);
+    console.log("Development API Key seeded:", devApiKey);
+
+    // Production Ingestion Key
+    const prodPrefix = "il_pk_prod";
+    const prodEntropy = crypto.randomBytes(32).toString("hex");
+    const prodApiKeyValue = `${prodPrefix}_${prodEntropy}`;
+    const prodApiKeyHash = crypto
+      .createHash("sha256")
+      .update(prodApiKeyValue)
+      .digest("hex");
+    const prodKeyHint = `${prodPrefix}_${prodEntropy.slice(0, 4)}...${prodEntropy.slice(-4)}`;
+
+    const prodApiKey = await tx.apiKey.create({
+      data: {
+        name: "Production Ingestion Key",
+        keyValue: prodApiKeyValue,
+        keyHash: prodApiKeyHash,
+        keyHint: prodKeyHint,
+        type: ApiKeyType.INGESTION,
+        environment: Environment.PRODUCTION,
+        projectId: project.id,
+        createdById: user.id,
+        lastUsedAt: new Date(Date.now() - 3600000), // Used 1 hour ago
+      },
+    });
+    console.log("Production API Key seeded:", prodApiKey);
+
+    // Management Key (no keyValue stored for security)
+    const mgmtPrefix = "il_sk_prod";
+    const mgmtEntropy = crypto.randomBytes(32).toString("hex");
+    const mgmtApiKeyValue = `${mgmtPrefix}_${mgmtEntropy}`;
+    const mgmtApiKeyHash = crypto
+      .createHash("sha256")
+      .update(mgmtApiKeyValue)
+      .digest("hex");
+    const mgmtKeyHint = `${mgmtPrefix}_${mgmtEntropy.slice(0, 4)}...${mgmtEntropy.slice(-4)}`;
+
+    const mgmtApiKey = await tx.apiKey.create({
+      data: {
+        name: "Production Management Key",
+        keyValue: null, // Management keys should not store plaintext
+        keyHash: mgmtApiKeyHash,
+        keyHint: mgmtKeyHint,
+        type: ApiKeyType.MANAGEMENT,
+        environment: Environment.PRODUCTION,
+        projectId: project.id,
+        createdById: user.id,
+        lastUsedAt: new Date(Date.now() - 7200000), // Used 2 hours ago
+      },
+    });
+    console.log("Management API Key seeded:", mgmtApiKey);
 
     // 4. Seed End Users (4 known + 2 anonymous)
     const endUsers = await Promise.all([
@@ -318,16 +377,20 @@ async function main() {
             eventTimestamp: new Date(baseTime - startOffset + event.offset),
             projectId: project.id,
             endUserId: endUser.id,
-            environment: env,
+            environment: env as Environment,
             properties: event.props,
             metadata: {
               browser: ["Chrome", "Firefox", "Safari", "Edge"][userIndex % 4],
-              browser_version: "120.0.0",
+              browser_version: ["120.0.0", "119.0.1", "17.2", "120.0.1"][userIndex % 4],
               os: ["MacOS", "Windows", "Linux", "Android"][userIndex % 4],
+              os_version: ["14.2", "11", "6.5.0", "14"][userIndex % 4],
               device_type: ["Desktop", "Mobile", "Tablet"][userIndex % 3],
+              screen_width: [1920, 390, 768][userIndex % 3],
+              screen_height: [1080, 844, 1024][userIndex % 3],
               current_url: `https://shop.naijamall.ng/${event.name}`,
               host: "shop.naijamall.ng",
               pathname: `/${event.name}`,
+              referrer: userIndex % 2 === 0 ? "https://google.com" : "https://shop.naijamall.ng",
               geoip_country_name: [
                 "Nigeria",
                 "Kenya",
@@ -336,6 +399,7 @@ async function main() {
                 "Egypt",
                 "Ethiopia",
               ][userIndex % 6],
+              geoip_country_code: ["NG", "KE", "ZA", "GH", "EG", "ET"][userIndex % 6],
               geoip_city_name: [
                 "Lagos",
                 "Nairobi",
@@ -344,10 +408,24 @@ async function main() {
                 "Cairo",
                 "Addis Ababa",
               ][userIndex % 6],
+              geoip_timezone: [
+                "Africa/Lagos",
+                "Africa/Nairobi",
+                "Africa/Johannesburg",
+                "Africa/Accra",
+                "Africa/Cairo",
+                "Africa/Addis_Ababa",
+              ][userIndex % 6],
               lib: "insightloop-browser",
               lib_version: "1.102.1",
-              ip: `105.112.${userIndex}.${Math.floor(Math.random() * 255)}`,
-              user_agent: `Mozilla/5.0 (compatible; InsightLoop/1.0)`,
+              ip: `105.112.${userIndex + 10}.${Math.floor(Math.random() * 255)}`,
+              user_agent: [
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:119.0) Gecko/20100101 Firefox/119.0",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              ][userIndex % 4],
+              locale: ["en-NG", "en-KE", "en-ZA", "en-GH", "ar-EG", "am-ET"][userIndex % 6],
             },
           });
         }
@@ -388,17 +466,30 @@ async function main() {
           session_id: `sess_extra_${userIndex}_${i}`,
         },
         metadata: {
-          browser: "Chrome",
-          browser_version: "120.0.0",
-          os: "Windows",
-          device_type: "Desktop",
+          browser: ["Chrome", "Firefox", "Safari"][i % 3],
+          browser_version: ["120.0.0", "119.0.1", "17.2"][i % 3],
+          os: ["Windows", "MacOS", "Android"][i % 3],
+          os_version: ["11", "14.2", "14"][i % 3],
+          device_type: ["Desktop", "Mobile"][i % 2],
+          screen_width: [1920, 390][i % 2],
+          screen_height: [1080, 844][i % 2],
           current_url: "https://shop.naijamall.ng/search",
           host: "shop.naijamall.ng",
           pathname: "/search",
-          geoip_country_name: "Nigeria",
-          geoip_city_name: "Abuja",
+          referrer: "https://google.com",
+          geoip_country_name: ["Nigeria", "Ghana", "Kenya"][i % 3],
+          geoip_country_code: ["NG", "GH", "KE"][i % 3],
+          geoip_city_name: ["Abuja", "Kumasi", "Nairobi"][i % 3],
+          geoip_timezone: ["Africa/Lagos", "Africa/Accra", "Africa/Nairobi"][i % 3],
           lib: "insightloop-browser",
           lib_version: "1.102.1",
+          ip: `102.89.${i}.${Math.floor(Math.random() * 255)}`,
+          user_agent: [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
+            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+          ][i % 3],
+          locale: ["en-NG", "en-GH", "en-KE"][i % 3],
         },
       });
     }
@@ -570,22 +661,36 @@ async function main() {
           browser: ["Chrome", "Safari", "Firefox", "Edge"][i % 4],
           browser_version: ["120.0.0", "17.2", "119.0", "120.0.1"][i % 4],
           os: ["Windows", "Android", "MacOS", "iOS"][i % 4],
+          os_version: ["11", "14", "14.2", "17.2"][i % 4],
           device_type: ["Desktop", "Mobile", "Tablet"][i % 3],
-          current_urxl: `https://shop.naijamall.ng/${
+          screen_width: [1920, 390, 768][i % 3],
+          screen_height: [1080, 844, 1024][i % 3],
+          current_url: `https://shop.naijamall.ng/${
             ["checkout", "products", "dashboard", "search"][i % 4]
           }`,
           host: "shop.naijamall.ng",
           pathname: `/${["checkout", "products", "dashboard", "search"][i % 4]}`,
+          referrer: i % 2 === 0 ? "https://shop.naijamall.ng" : "https://google.com",
           geoip_country_name: ["Nigeria", "Kenya", "South Africa", "Ghana"][
             i % 4
           ],
+          geoip_country_code: ["NG", "KE", "ZA", "GH"][i % 4],
           geoip_city_name: ["Port Harcourt", "Mombasa", "Cape Town", "Kumasi"][
             i % 4
           ],
+          geoip_timezone: ["Africa/Lagos", "Africa/Nairobi", "Africa/Johannesburg", "Africa/Accra"][i % 4],
           lib: "insightloop-browser",
           lib_version: "1.102.1",
-          viewport_width: 1920,
-          viewport_height: 1080,
+          ip: `197.210.${i + 50}.${Math.floor(Math.random() * 255)}`,
+          user_agent: [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.1"
+          ][i % 4],
+          locale: ["en-NG", "en-KE", "en-ZA", "en-GH"][i % 4],
+          viewport_width: [1920, 390, 768][i % 3],
+          viewport_height: [1080, 844, 1024][i % 3],
         },
       });
     }
@@ -595,25 +700,234 @@ async function main() {
     });
     console.log(`Seeded ${createdFeedbacks.count} feedbacks`);
 
+    // 7. Seed Notifications
+    const notifications = [];
+    const notificationTemplates = [
+      {
+        title: "New feedback received",
+        message: "Sarah Johnson submitted feedback about checkout flow",
+        type: NotificationType.FEEDBACK,
+        status: NotificationStatus.INFO,
+        actionUrl: `/dashboard/${project.id}/feedback`,
+        read: false,
+      },
+      {
+        title: "High event volume detected",
+        message: "Unusual spike in page_viewed events in the last hour",
+        type: NotificationType.EVENT,
+        status: NotificationStatus.WARNING,
+        actionUrl: `/dashboard/${project.id}/events`,
+        read: false,
+      },
+      {
+        title: "API key expiring soon",
+        message: "Your Production Management Key will expire in 30 days",
+        type: NotificationType.SECURITY,
+        status: NotificationStatus.WARNING,
+        actionUrl: `/dashboard/${project.id}/settings/api-keys`,
+        read: true,
+      },
+      {
+        title: "Project created successfully",
+        message: "E-Commerce Platform is ready to start collecting data",
+        type: NotificationType.PROJECT,
+        status: NotificationStatus.SUCCESS,
+        actionUrl: `/dashboard/${project.id}`,
+        read: true,
+      },
+      {
+        title: "System maintenance scheduled",
+        message: "Scheduled maintenance on March 15th from 2:00 AM - 4:00 AM UTC",
+        type: NotificationType.SYSTEM,
+        status: NotificationStatus.INFO,
+        actionUrl: null,
+        read: false,
+      },
+      {
+        title: "Critical: Multiple login failures",
+        message: "5 failed login attempts detected in the last 10 minutes",
+        type: NotificationType.SECURITY,
+        status: NotificationStatus.ERROR,
+        actionUrl: "/settings/security",
+        read: false,
+      },
+      {
+        title: "Negative feedback alert",
+        message: "3 low-rated feedback items received today",
+        type: NotificationType.FEEDBACK,
+        status: NotificationStatus.WARNING,
+        actionUrl: `/dashboard/${project.id}/feedback?rating=1-2`,
+        read: true,
+      },
+      {
+        title: "Feature flag updated",
+        message: "new_checkout_flow feature flag enabled in staging",
+        type: NotificationType.PROJECT,
+        status: NotificationStatus.INFO,
+        actionUrl: `/dashboard/${project.id}/features`,
+        read: true,
+      },
+    ];
+
+    for (let i = 0; i < notificationTemplates.length; i++) {
+      const template = notificationTemplates[i];
+      notifications.push({
+        title: template.title,
+        message: template.message,
+        type: template.type,
+        status: template.status,
+        notificationChannel: NotificationChannel.IN_APP,
+        actionUrl: template.actionUrl,
+        read: template.read,
+        readAt: template.read ? new Date(baseTime - i * 3600000) : null,
+        userId: user.id,
+        projectId: template.type === NotificationType.SYSTEM ? null : project.id,
+        data: {
+          priority: ["low", "medium", "high"][i % 3],
+          source: "system",
+        },
+      });
+    }
+
+    const createdNotifications = await tx.notification.createMany({
+      data: notifications,
+    });
+    console.log(`Seeded ${createdNotifications.count} notifications`);
+
+    // 8. Seed Sessions
+    const sessions = [];
+    const now = Date.now();
+
+    // Active session
+    sessions.push({
+      userId: user.id,
+      sessionId: crypto.randomUUID(),
+      csrfToken: crypto.randomBytes(32).toString("hex"),
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      ip: "197.210.70.45",
+      expiresAt: new Date(now + 7 * 24 * 60 * 60 * 1000), // 7 days
+      maxExpiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000), // 30 days
+    });
+
+    // Expired session
+    sessions.push({
+      userId: user.id,
+      sessionId: crypto.randomUUID(),
+      csrfToken: crypto.randomBytes(32).toString("hex"),
+      userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)",
+      ip: "102.89.42.128",
+      expiresAt: new Date(now - 7 * 24 * 60 * 60 * 1000), // Expired 7 days ago
+      maxExpiresAt: new Date(now - 1 * 24 * 60 * 60 * 1000), // Max expired 1 day ago
+    });
+
+    // Revoked session
+    sessions.push({
+      userId: user.id,
+      sessionId: crypto.randomUUID(),
+      csrfToken: crypto.randomBytes(32).toString("hex"),
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      ip: "105.112.15.89",
+      expiresAt: new Date(now + 7 * 24 * 60 * 60 * 1000),
+      maxExpiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000),
+      revokedAt: new Date(now - 2 * 60 * 60 * 1000), // Revoked 2 hours ago
+    });
+
+    const createdSessions = await tx.session.createMany({
+      data: sessions,
+    });
+    console.log(`Seeded ${createdSessions.count} sessions`);
+
+    // 9. Seed Audit Logs
+    const auditLogs = [];
+    const auditActions = [
+      {
+        action: "user.login",
+        metadata: { method: "email", success: true },
+        timeOffset: 3600000,
+      },
+      {
+        action: "project.created",
+        metadata: { projectName: "E-Commerce Platform" },
+        timeOffset: 7200000,
+      },
+      {
+        action: "apikey.created",
+        metadata: { keyType: "INGESTION", environment: "DEVELOPMENT" },
+        timeOffset: 7300000,
+      },
+      {
+        action: "apikey.created",
+        metadata: { keyType: "INGESTION", environment: "PRODUCTION" },
+        timeOffset: 7400000,
+      },
+      {
+        action: "apikey.created",
+        metadata: { keyType: "MANAGEMENT", environment: "PRODUCTION" },
+        timeOffset: 7500000,
+      },
+      {
+        action: "user.settings_updated",
+        metadata: { changes: ["notificationChannels", "digestFrequency"] },
+        timeOffset: 10800000,
+      },
+      {
+        action: "project.settings_updated",
+        metadata: { projectId: project.id, changes: ["retentionDays"] },
+        timeOffset: 14400000,
+      },
+      {
+        action: "feedback.viewed",
+        metadata: { feedbackId: "feedback_123", status: "NEW" },
+        timeOffset: 18000000,
+      },
+    ];
+
+    for (const log of auditActions) {
+      auditLogs.push({
+        userId: user.id,
+        action: log.action,
+        metadata: log.metadata,
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        ip: "197.210.70.45",
+        createdAt: new Date(now - log.timeOffset),
+      });
+    }
+
+    const createdAuditLogs = await tx.auditLog.createMany({
+      data: auditLogs,
+    });
+    console.log(`Seeded ${createdAuditLogs.count} audit logs`);
+
     return {
       user,
       project,
-      apiKey,
       endUsers,
       eventsCount: createdEvents.count,
       feedbacksCount: createdFeedbacks.count,
+      notificationsCount: createdNotifications.count,
+      sessionsCount: createdSessions.count,
+      auditLogsCount: createdAuditLogs.count,
     };
   });
 
-  console.log("Seeding completed successfully!");
-  console.log("Summary:", {
-    user: result.user.email,
-    project: result.project.name,
-    apiKey: result.apiKey.name,
-    endUsersCount: result.endUsers.length,
-    eventsCount: result.eventsCount,
-    feedbacksCount: result.feedbacksCount,
-  });
+  console.log("\n==============================================");
+  console.log("🎉 Seeding completed successfully!");
+  console.log("==============================================\n");
+  console.log("📊 Summary:");
+  console.log("  User:", result.user.email);
+  console.log("  Project:", result.project.name);
+  console.log("  End Users:", result.endUsers.length);
+  console.log("  Events:", result.eventsCount);
+  console.log("  Feedbacks:", result.feedbacksCount);
+  console.log("  Notifications:", result.notificationsCount);
+  console.log("  Sessions:", result.sessionsCount);
+  console.log("  Audit Logs:", result.auditLogsCount);
+  console.log("\n🔑 API Keys created:");
+  console.log("  - Development Ingestion Key");
+  console.log("  - Production Ingestion Key");
+  console.log("  - Production Management Key");
+  console.log("\n✅ Database ready for development!");
+  console.log("==============================================\n");
 }
 
 main()

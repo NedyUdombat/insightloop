@@ -28,32 +28,41 @@ export default function PreferencesSection({
           </h3>
 
           <ToggleSwitch
-            label="Email Notifications"
-            description="Receive email updates about project events"
-            checked={preferences.emailNotifications}
+            label="Event Notifications"
+            description="Generate notifications for new events"
+            checked={preferences.eventNotifications}
             onChange={(checked) =>
               setPreferences({
                 ...preferences,
-                emailNotifications: checked,
+                eventNotifications: checked,
               })
             }
           />
 
           <ToggleSwitch
-            label="Event Alerts"
-            description="Get notified when new events are captured"
-            checked={preferences.eventAlerts}
+            label="Feedback Notifications"
+            description="Generate notifications for new feedback"
+            checked={preferences.feedbackNotifications}
             onChange={(checked) =>
-              setPreferences({ ...preferences, eventAlerts: checked })
+              setPreferences({ ...preferences, feedbackNotifications: checked })
             }
           />
 
           <ToggleSwitch
-            label="Weekly Reports"
-            description="Receive weekly summary of project activity"
-            checked={preferences.weeklyReports}
+            label="System Notifications"
+            description="Generate notifications for system events"
+            checked={preferences.systemNotifications}
             onChange={(checked) =>
-              setPreferences({ ...preferences, weeklyReports: checked })
+              setPreferences({ ...preferences, systemNotifications: checked })
+            }
+          />
+
+          <ToggleSwitch
+            label="Security Notifications"
+            description="Generate notifications for security events"
+            checked={preferences.securityNotifications}
+            onChange={(checked) =>
+              setPreferences({ ...preferences, securityNotifications: checked })
             }
           />
         </div>

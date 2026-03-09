@@ -55,10 +55,11 @@ export async function updateProject(
     {
       name: payload.name,
       autoArchive: payload.preferences?.autoArchive,
-      emailNotifications: payload.preferences?.emailNotifications,
-      eventAlerts: payload.preferences?.eventAlerts,
+      eventNotifications: payload.preferences?.eventNotifications,
+      feedbackNotifications: payload.preferences?.feedbackNotifications,
+      systemNotifications: payload.preferences?.systemNotifications,
+      securityNotifications: payload.preferences?.securityNotifications,
       retentionDays: payload.preferences?.retentionDays,
-      weeklyReports: payload.preferences?.weeklyReports,
       defaultEnvironment: payload.preferences?.defaultEnvironment,
     },
   );

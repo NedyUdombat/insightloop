@@ -198,7 +198,7 @@ class FeedbackService {
       properties: feedback.properties,
       metadata: feedback.metadata,
       environment: feedback.environment,
-      feedbackTimestamp: feedback.feedbackTimestamp.toISOString(),
+      feedbackTimestamp: feedback.feedbackTimestamp?.toISOString() || null,
       createdAt: feedback.createdAt.toISOString(),
       updatedAt: feedback.updatedAt.toISOString(),
       endUser: feedback.endUser

@@ -26,6 +26,13 @@ model User {
   loginFails     Int?
   lastProjectId  String?
 
+  // Notification Preferences
+  globalNotificationsEnabled Boolean               @default(true)
+  notificationChannels       NotificationChannel[] @default([IN_APP])
+  quietHoursStart            DateTime?
+  quietHoursEnd              DateTime?
+  digestFrequency            DigestFrequency       @default(REAL_TIME)
+
   // Timestamps
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -35,12 +42,13 @@ model User {
   bannedAt        DateTime?
   lastAccessed    DateTime?
 
-  projects  Project[]
-  sessions  Session[]
-  auditLogs AuditLog[]
-  tokens    Token[]
-  apiKeys   ApiKey[]
-  features  Feature[]
+  projects      Project[]
+  sessions      Session[]
+  auditLogs     AuditLog[]
+  tokens        Token[]
+  apiKeys       ApiKey[]
+  features      Feature[]
+  notifications Notification[]
 
   // Indexes
   @@index([id])
@@ -58,10 +66,13 @@ model Project {
   id   String @id @default(uuid(7))
   name String
 
-  // Preferences
-  emailNotifications Boolean     @default(true)
-  eventAlerts        Boolean     @default(true)
-  weeklyReports      Boolean     @default(false)
+  // Notification Preferences (what notifications to generate)
+  eventNotifications    Boolean @default(true)
+  feedbackNotifications Boolean @default(true)
+  systemNotifications   Boolean @default(true)
+  securityNotifications Boolean @default(true)
+
+  // Project Settings
   autoArchive        Boolean     @default(false)
   retentionDays      Int         @default(30)
   defaultEnvironment Environment @default(DEVELOPMENT)
@@ -71,11 +82,12 @@ model Project {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  features  Feature[]
-  events    Event[]
-  endUsers  EndUser[]
-  feedbacks Feedback[]
-  apiKeys   ApiKey[]
+  features      Feature[]
+  events        Event[]
+  endUsers      EndUser[]
+  feedbacks     Feedback[]
+  apiKeys       ApiKey[]
+  notifications Notification[]
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
@@ -341,4 +353,66 @@ enum Environment {
   DEVELOPMENT
   STAGING
   PRODUCTION
+}
+
+model Notification {
+  id                  String              @id @default(uuid(7))
+  title               String
+  message             String
+  type                NotificationType    @default(SYSTEM)
+  status              NotificationStatus  @default(INFO)
+  notificationChannel NotificationChannel @default(IN_APP)
+  read                Boolean             @default(false)
+  actionUrl           String? // URL to navigate to when notification is clicked
+  data                Json? // Additional data payload
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  readAt    DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  // Indexes
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@index([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+  // Map
+  @@map("notifications")
+}
+
+enum NotificationType {
+  EVENT
+  FEEDBACK
+  SYSTEM
+  PROJECT
+  SECURITY
+}
+
+enum NotificationStatus {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+  WEBHOOK
+}
+
+enum DigestFrequency {
+  REAL_TIME
+  DAILY
+  WEEKLY
 }

@@ -2,8 +2,9 @@
 
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
+import NotificationDropdown from "@/components/NotificationDropdown";
 import DashboardSidebar from "@/components/sidebar";
-import { getInitialsFromName } from "@/lib/utils";
+import UserAvatarDropdown from "@/components/UserAvatarDropdown";
 import useGetCurrentUser from "@/queries/user/useGetCurrentUser";
 import { ProjectProvider } from "./ProjectContext";
 
@@ -24,23 +25,9 @@ export default function ProjectLayout({ children }: { children: ReactNode }) {
           <header className="flex items-center justify-between border-b border-neutral-800 px-10 py-4 flex-shrink-0">
             <div className="text-sm text-neutral-400">Dashboard</div>
 
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                className="text-neutral-400 hover:text-neutral-200"
-              >
-                🔔
-              </button>
-
-              {userData && (
-                <div className="h-8 w-8 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs font-medium">
-                  {getInitialsFromName(
-                    userData?.email,
-                    userData?.firstname,
-                    userData?.lastname,
-                  )}
-                </div>
-              )}
+            <div className="flex items-center gap-6 justify-center">
+              <NotificationDropdown />
+              {userData && <UserAvatarDropdown user={userData} />}
             </div>
           </header>
 

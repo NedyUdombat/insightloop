@@ -9,9 +9,10 @@ import useUpdateProject from "@/queries/project/useUpdateProject";
 import { useProject } from "../ProjectContext";
 
 export interface ProjectPreferences {
-  emailNotifications: boolean;
-  eventAlerts: boolean;
-  weeklyReports: boolean;
+  eventNotifications: boolean;
+  feedbackNotifications: boolean;
+  systemNotifications: boolean;
+  securityNotifications: boolean;
   autoArchive: boolean;
   retentionDays: number;
   defaultEnvironment: Environment;
@@ -34,9 +35,10 @@ const useProjectSettingsLogic = () => {
 
   // Preferences state
   const [preferences, setPreferences] = useState<ProjectPreferences>({
-    emailNotifications: true,
-    eventAlerts: true,
-    weeklyReports: false,
+    eventNotifications: true,
+    feedbackNotifications: true,
+    systemNotifications: true,
+    securityNotifications: true,
     autoArchive: false,
     retentionDays: 30,
     defaultEnvironment: "PRODUCTION" as Environment,
@@ -47,9 +49,10 @@ const useProjectSettingsLogic = () => {
       setProjectName(project.name);
       // Load preferences from project data
       setPreferences({
-        emailNotifications: project.emailNotifications ?? true,
-        eventAlerts: project.eventAlerts ?? true,
-        weeklyReports: project.weeklyReports ?? false,
+        eventNotifications: project.eventNotifications ?? true,
+        feedbackNotifications: project.feedbackNotifications ?? true,
+        systemNotifications: project.systemNotifications ?? true,
+        securityNotifications: project.securityNotifications ?? true,
         autoArchive: project.autoArchive ?? false,
         retentionDays: project.retentionDays ?? 30,
         defaultEnvironment:

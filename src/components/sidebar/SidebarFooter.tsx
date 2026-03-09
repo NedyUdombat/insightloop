@@ -65,18 +65,21 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
 
       <SidebarSection icon={Settings} label="Settings" collapsed={collapsed}>
         <a
-          href="/"
+          href="/settings/profile"
           className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
         >
           <User size={18} />
           Profile
         </a>
-        <span className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3 opacity-50 cursor-not-allowed">
+        <a
+          href="/settings/billing"
+          className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
+        >
           <CreditCard size={18} />
           Billing
-        </span>
+        </a>
         <a
-          href="/"
+          href="/settings/notifications"
           className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
         >
           <Bell size={18} />

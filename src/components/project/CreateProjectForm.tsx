@@ -6,9 +6,10 @@ import { useState } from "react";
 import type { Environment } from "@/generated/prisma/enums";
 
 interface ProjectSettings {
-  emailNotifications: boolean;
-  eventAlerts: boolean;
-  weeklyReports: boolean;
+  eventNotifications: boolean;
+  feedbackNotifications: boolean;
+  systemNotifications: boolean;
+  securityNotifications: boolean;
   autoArchive: boolean;
   retentionDays: number;
   defaultEnvironment: Environment;
@@ -172,32 +173,41 @@ export default function CreateProjectForm({
                       </h3>
 
                       <ToggleSwitch
-                        label="Email Notifications"
-                        description="Receive email updates about project events"
-                        checked={settings.emailNotifications}
+                        label="Event Notifications"
+                        description="Generate notifications for new events"
+                        checked={settings.eventNotifications}
                         onChange={(checked) =>
                           setSettings({
                             ...settings,
-                            emailNotifications: checked,
+                            eventNotifications: checked,
                           })
                         }
                       />
 
                       <ToggleSwitch
-                        label="Event Alerts"
-                        description="Get notified when new events are captured"
-                        checked={settings.eventAlerts}
+                        label="Feedback Notifications"
+                        description="Generate notifications for new feedback"
+                        checked={settings.feedbackNotifications}
                         onChange={(checked) =>
-                          setSettings({ ...settings, eventAlerts: checked })
+                          setSettings({ ...settings, feedbackNotifications: checked })
                         }
                       />
 
                       <ToggleSwitch
-                        label="Weekly Reports"
-                        description="Receive weekly summary of project activity"
-                        checked={settings.weeklyReports}
+                        label="System Notifications"
+                        description="Generate notifications for system events"
+                        checked={settings.systemNotifications}
                         onChange={(checked) =>
-                          setSettings({ ...settings, weeklyReports: checked })
+                          setSettings({ ...settings, systemNotifications: checked })
+                        }
+                      />
+
+                      <ToggleSwitch
+                        label="Security Notifications"
+                        description="Generate notifications for security events"
+                        checked={settings.securityNotifications}
+                        onChange={(checked) =>
+                          setSettings({ ...settings, securityNotifications: checked })
                         }
                       />
                     </div>

@@ -13,6 +13,18 @@ CREATE TYPE "ApiKeyType" AS ENUM ('INGESTION', 'MANAGEMENT');
 -- CreateEnum
 CREATE TYPE "Environment" AS ENUM ('DEVELOPMENT', 'STAGING', 'PRODUCTION');
 
+-- CreateEnum
+CREATE TYPE "NotificationType" AS ENUM ('EVENT', 'FEEDBACK', 'SYSTEM', 'PROJECT', 'SECURITY');
+
+-- CreateEnum
+CREATE TYPE "NotificationStatus" AS ENUM ('INFO', 'SUCCESS', 'WARNING', 'ERROR');
+
+-- CreateEnum
+CREATE TYPE "NotificationChannel" AS ENUM ('IN_APP', 'EMAIL', 'SMS', 'PUSH', 'WEBHOOK');
+
+-- CreateEnum
+CREATE TYPE "DigestFrequency" AS ENUM ('REAL_TIME', 'DAILY', 'WEEKLY');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -26,6 +38,11 @@ CREATE TABLE "users" (
     "previousHashes" TEXT[],
     "loginFails" INTEGER,
     "lastProjectId" TEXT,
+    "globalNotificationsEnabled" BOOLEAN NOT NULL DEFAULT true,
+    "notificationChannels" "NotificationChannel"[] DEFAULT ARRAY['IN_APP']::"NotificationChannel"[],
+    "quietHoursStart" TIMESTAMP(3),
+    "quietHoursEnd" TIMESTAMP(3),
+    "digestFrequency" "DigestFrequency" NOT NULL DEFAULT 'REAL_TIME',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -41,9 +58,10 @@ CREATE TABLE "users" (
 CREATE TABLE "projects" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "emailNotifications" BOOLEAN NOT NULL DEFAULT true,
-    "eventAlerts" BOOLEAN NOT NULL DEFAULT true,
-    "weeklyReports" BOOLEAN NOT NULL DEFAULT false,
+    "eventNotifications" BOOLEAN NOT NULL DEFAULT true,
+    "feedbackNotifications" BOOLEAN NOT NULL DEFAULT true,
+    "systemNotifications" BOOLEAN NOT NULL DEFAULT true,
+    "securityNotifications" BOOLEAN NOT NULL DEFAULT true,
     "autoArchive" BOOLEAN NOT NULL DEFAULT false,
     "retentionDays" INTEGER NOT NULL DEFAULT 30,
     "defaultEnvironment" "Environment" NOT NULL DEFAULT 'DEVELOPMENT',
@@ -202,6 +220,27 @@ CREATE TABLE "apikeys" (
     CONSTRAINT "apikeys_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "notifications" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "type" "NotificationType" NOT NULL DEFAULT 'SYSTEM',
+    "status" "NotificationStatus" NOT NULL DEFAULT 'INFO',
+    "notificationChannel" "NotificationChannel" NOT NULL DEFAULT 'IN_APP',
+    "read" BOOLEAN NOT NULL DEFAULT false,
+    "actionUrl" TEXT,
+    "data" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+    "readAt" TIMESTAMP(3),
+    "userId" TEXT NOT NULL,
+    "projectId" TEXT,
+
+    CONSTRAINT "notifications_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -316,6 +355,21 @@ CREATE INDEX "apikeys_keyHash_deletedAt_revokedAt_environment_idx" ON "apikeys"(
 -- CreateIndex
 CREATE UNIQUE INDEX "apikeys_keyHash_key" ON "apikeys"("keyHash");
 
+-- CreateIndex
+CREATE INDEX "notifications_userId_read_idx" ON "notifications"("userId", "read");
+
+-- CreateIndex
+CREATE INDEX "notifications_userId_createdAt_idx" ON "notifications"("userId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "notifications_userId_projectId_idx" ON "notifications"("userId", "projectId");
+
+-- CreateIndex
+CREATE INDEX "notifications_userId_idx" ON "notifications"("userId");
+
+-- CreateIndex
+CREATE INDEX "notifications_projectId_idx" ON "notifications"("projectId");
+
 -- AddForeignKey
 ALTER TABLE "projects" ADD CONSTRAINT "projects_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -354,3 +408,9 @@ ALTER TABLE "apikeys" ADD CONSTRAINT "apikeys_projectId_fkey" FOREIGN KEY ("proj
 
 -- AddForeignKey
 ALTER TABLE "apikeys" ADD CONSTRAINT "apikeys_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,6 +1,7 @@
-import type { Prisma, PrismaClient } from "@prisma/client/extension";
+import type { PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { Environment } from "@/generated/prisma/enums";
+import type { EventWhereInput } from "@/generated/prisma/models/Event";
 import type { IEvent } from "../types/IEvent";
 
 class EventService {
@@ -44,19 +45,16 @@ class EventService {
     startDate?: Date;
     endDate?: Date;
   }) {
-    const whereClause: Prisma.EventWhereInput = {
+    const whereClause: EventWhereInput = {
       projectId,
     };
 
-    if (startDate) {
-      whereClause.eventTimeStamp = { gte: startDate };
-    }
-
-    if (endDate) {
-      whereClause.eventTimeStamp = {
-        ...whereClause.eventTimeStamp,
-        lte: endDate,
-      };
+    if (startDate && endDate) {
+      whereClause.eventTimestamp = { gte: startDate, lte: endDate };
+    } else if (startDate) {
+      whereClause.eventTimestamp = { gte: startDate };
+    } else if (endDate) {
+      whereClause.eventTimestamp = { lte: endDate };
     }
 
     return prisma.event.count({
@@ -140,7 +138,7 @@ class EventService {
   }) {
     const skip = (page - 1) * limit;
 
-    const whereClause: Prisma.EventWhereInput = {
+    const whereClause: EventWhereInput = {
       projectId,
     };
 
