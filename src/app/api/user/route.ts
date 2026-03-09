@@ -32,6 +32,14 @@ export const PATCH = requireAuth(async (req) => {
     updateData.lastname = validatedUserData.lastname;
   }
 
+  if (validatedUserData.phone !== undefined) {
+    updateData.phone = validatedUserData.phone;
+  }
+
+  if (validatedUserData.profileImage !== undefined) {
+    updateData.profileImage = validatedUserData.profileImage;
+  }
+
   const user = await userService.updateUser({
     where: { id: userData.id },
     data: updateData,

@@ -6,6 +6,8 @@ export interface IUser extends IModel {
   firstname: string;
   lastname: string;
   email: string;
+  phone: string | null;
+  profileImage: string | null;
   role: UserRole;
   password: string;
   bannedReason: string | null;
@@ -34,6 +36,8 @@ export interface PublicUser {
   firstname: string;
   lastname: string;
   email: string;
+  phone: string | null;
+  profileImage: string | null;
   role: UserRole;
   emailVerified: boolean | null;
   emailVerifiedAt: Date | null;

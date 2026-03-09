@@ -35,6 +35,8 @@ export function requireAuth<
       (req as AuthenticatedRequest).user = {
         id: user.id,
         email: user.email,
+        phone: user.phone,
+        profileImage: user.profileImage,
         role: user.role,
         emailVerified: user.emailVerified,
         emailVerifiedAt: user.emailVerifiedAt,

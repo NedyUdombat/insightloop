@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { IUser, PublicUser } from "@/api/types/IUser";
 import type { CreateUserInput } from "@/api/validators/user";
@@ -39,6 +40,8 @@ class UserService {
       firstname: user.firstname,
       lastname: user.lastname,
       email: user.email,
+      phone: user.phone,
+      profileImage: user.profileImage,
       role: user.role,
       emailVerified: user.emailVerified,
       emailVerifiedAt: user.emailVerifiedAt,
@@ -57,11 +60,14 @@ class UserService {
   async updateUser({
     where,
     data,
+    tx,
   }: {
     where: UserWhereUniqueInput;
     data: Prisma.UserUpdateInput;
+    tx?: PrismaClient;
   }) {
-    return prisma.user.update({
+    const db = tx ?? prisma;
+    return db.user.update({
       where,
       data,
     });

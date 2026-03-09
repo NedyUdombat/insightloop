@@ -18,6 +18,8 @@ model User {
   firstname      String
   lastname       String
   email          String   @unique
+  phone          String?
+  profileImage   String?
   password       String
   role           UserRole @default(USER)
   bannedReason   String?
