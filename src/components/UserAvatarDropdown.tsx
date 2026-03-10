@@ -71,9 +71,8 @@ export default function UserAvatarDropdown({ user }: UserAvatarDropdownProps) {
           </DropdownMenu.Item>
 
           <DropdownMenu.Item
-            className="flex items-center gap-3 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800 rounded-md outline-none cursor-pointer opacity-50"
+            className="flex items-center gap-3 px-3 py-2 text-sm text-neutral-300 rounded-md outline-none cursor-not-allowed opacity-50"
             disabled
-            onSelect={() => router.push("/settings/billing")}
           >
             <CreditCard size={16} />
             Billing

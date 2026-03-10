@@ -4,6 +4,7 @@ import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
 import AuditService from "@/api/services/AuditService";
 import ProjectService from "@/api/services/ProjectService";
+import notificationService from "@/api/services/NotificationService";
 import {
   type UpdateProjectInput,
   UpdateProjectSchema,
@@ -128,12 +129,18 @@ export const PATCH = requireAuth(async (req) => {
   }
 
   try {
+    let shouldNotify = false;
+    let updatedFields: string[] = [];
+
     const updatedProject = await prisma.$transaction(async (tx) => {
       const project = await projectService.assertOwnership({
         projectId,
         userId: req.user.id,
         tx,
       });
+
+      shouldNotify = project.systemNotifications;
+      updatedFields = Object.keys(updateData);
 
       const updated = await projectService.updateProject({
         where: { id: project.id },
@@ -147,7 +154,7 @@ export const PATCH = requireAuth(async (req) => {
         userId: req.user.id,
         metadata: {
           projectId,
-          updatedFields: Object.keys(updateData),
+          updatedFields,
         },
         tx,
       });
@@ -168,6 +175,25 @@ export const PATCH = requireAuth(async (req) => {
 
       return updated;
     });
+
+    // Create notification after transaction completes (if enabled)
+    if (shouldNotify) {
+      const changedFields = updatedFields
+        .map((field) => field.replace(/([A-Z])/g, " $1").toLowerCase())
+        .join(", ");
+
+      // Fire and forget - don't block the response
+      notificationService
+        .createProjectNotification(
+          req.user.id,
+          projectId,
+          "Project Settings Updated",
+          `Project settings were updated: ${changedFields}`,
+        )
+        .catch((err) =>
+          console.error("Failed to create project update notification:", err),
+        );
+    }
 
     const serialized = projectService.serializeProject(updatedProject);
 
@@ -223,12 +249,19 @@ export const DELETE = requireAuth(async (req) => {
   }
 
   try {
+    let projectName = "";
+    let shouldNotify = false;
+
     await prisma.$transaction(async (tx) => {
       const project = await projectService.assertOwnership({
         projectId,
         userId: req.user.id,
         tx,
       });
+
+      projectName = project.name;
+      shouldNotify = project.systemNotifications;
+
       await projectService.deleteProject({
         id: project.id,
         ownerId: req.user.id,
@@ -248,6 +281,24 @@ export const DELETE = requireAuth(async (req) => {
         tx,
       });
     });
+
+    // Create notification after transaction completes (if enabled)
+    // Note: This will still create the notification even though the project is deleted
+    // because it's tied to the user, not the project (projectId will be null for deleted projects)
+    if (shouldNotify) {
+      // Fire and forget - don't block the response
+      notificationService
+        .createProjectNotification(
+          req.user.id,
+          projectId,
+          "Project Deleted",
+          `Project "${projectName}" has been deleted`,
+          "WARNING" as any,
+        )
+        .catch((err) =>
+          console.error("Failed to create project deletion notification:", err),
+        );
+    }
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err: unknown) {

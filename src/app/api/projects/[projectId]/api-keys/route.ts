@@ -4,6 +4,7 @@ import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
 import AuditService from "@/api/services/AuditService";
 import ProjectService from "@/api/services/ProjectService";
+import notificationService from "@/api/services/NotificationService";
 import { CreateApiKeySchema } from "@/api/validators/project";
 
 export const POST = requireAuth(async (req) => {
@@ -36,12 +37,16 @@ export const POST = requireAuth(async (req) => {
     environment,
   });
 
+  let shouldNotify = false;
+
   await prisma.$transaction(async (tx) => {
-    await projectService.assertOwnership({
+    const project = await projectService.assertOwnership({
       projectId,
       userId: req.user.id,
       tx,
     });
+
+    shouldNotify = project.securityNotifications;
 
     await apiKeyService.createApiKey({
       name,
@@ -86,6 +91,22 @@ export const POST = requireAuth(async (req) => {
       });
     }
   });
+
+  // Create notification after transaction completes (if enabled)
+  if (shouldNotify) {
+    // Fire and forget - don't block the response
+    notificationService
+      .createSecurityNotification(
+        req.user.id,
+        "New API Key Created",
+        `API key "${name}" was created for ${environment} environment`,
+        projectId,
+      )
+      .catch((err) =>
+        console.error("Failed to create API key creation notification:", err),
+      );
+  }
+
   return NextResponse.json(
     {
       data: {

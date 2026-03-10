@@ -71,13 +71,14 @@ export function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           <User size={18} />
           Profile
         </a>
-        <a
-          href="/settings/billing"
-          className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"
+        <button
+          type="button"
+          disabled
+          className="w-full p-2 rounded-md text-sm text-neutral-300 flex items-center gap-3 opacity-50 cursor-not-allowed"
         >
           <CreditCard size={18} />
           Billing
-        </a>
+        </button>
         <a
           href="/settings/notifications"
           className="p-2 rounded-md text-sm text-neutral-300 hover:bg-neutral-800 flex items-center gap-3  cursor-pointer"

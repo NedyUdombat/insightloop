@@ -4,6 +4,7 @@ import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
 import FeedbackService from "@/api/services/FeedbackService";
 import RateLimitService from "@/api/services/RateLimitService";
+import notificationService from "@/api/services/NotificationService";
 import { SDKFeedbackSchema } from "@/api/validators/feedback";
 
 const MAX_PAYLOAD_BYTES = 24 * 1024; // feedback should be smaller
@@ -60,6 +61,10 @@ export async function POST(req: NextRequest) {
   const feedbackService = new FeedbackService();
 
   try {
+    let createdFeedbackId: string | null = null;
+    let feedbackRating: number | null = null;
+    let feedbackMessage: string | null = null;
+
     await prisma.$transaction(async (tx) => {
       const resolvedEndUser = await endUserService.resolveEndUser({
         projectId: auth.project.id,
@@ -74,7 +79,7 @@ export async function POST(req: NextRequest) {
         sdkFeedbackId: feedback.id, // Store SDK-generated ID for reference
       };
 
-      await feedbackService.createFeedback({
+      const createdFeedback = await feedbackService.createFeedback({
         projectId: auth.project.id,
         endUserId: resolvedEndUser?.id,
         message: feedback.text, // SDK uses "text", backend uses "message"
@@ -87,7 +92,28 @@ export async function POST(req: NextRequest) {
         properties: feedback.properties,
         tx,
       });
+
+      createdFeedbackId = createdFeedback.id;
+      feedbackRating = feedback.rating || null;
+      feedbackMessage = feedback.text || null;
     });
+
+    // Create notification after transaction completes (if enabled)
+    if (auth.project.feedbackNotifications && createdFeedbackId) {
+      // Fire and forget - don't block the response
+      notificationService
+        .createFeedbackNotification(
+          auth.project.ownerId,
+          auth.project.id,
+          feedbackMessage || "New feedback received",
+          createdFeedbackId,
+          feedbackRating || undefined,
+        )
+        .catch((err) =>
+          console.error("Failed to create feedback notification:", err),
+        );
+    }
+
     return NextResponse.json({ success: true }, { status: 202 });
   } catch (err) {
     console.error("Feedback ingestion failed", err);

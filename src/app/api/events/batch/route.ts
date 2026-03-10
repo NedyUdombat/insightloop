@@ -6,6 +6,7 @@ import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
 import EventService from "@/api/services/EventService";
 import RateLimitService from "@/api/services/RateLimitService";
+import notificationService from "@/api/services/NotificationService";
 import { BatchEventSchema } from "@/api/validators/event";
 
 const MAX_PAYLOAD_BYTES = 32 * 1024; // 32KB - tweak
@@ -92,6 +93,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const createdEventIds: { eventName: string; eventId: string }[] = [];
+
     await prisma.$transaction(async (tx) => {
       // Process each event in the batch
       for (const event of events) {
@@ -109,7 +112,7 @@ export async function POST(req: NextRequest) {
         const timestamp = resolveEventTimestamp(event.eventTimestamp);
 
         // Create event
-        await eventService.createEvent({
+        const createdEvent = await eventService.createEvent({
           eventName: event.eventName,
           eventTimeStamp: timestamp,
           properties: event.properties || {},
@@ -118,8 +121,39 @@ export async function POST(req: NextRequest) {
           environment: auth.apiKey.environment,
           tx,
         });
+
+        // Store event info for notifications
+        createdEventIds.push({
+          eventName: event.eventName,
+          eventId: createdEvent.id,
+        });
       }
     });
+
+    // Create notifications after transaction completes (if enabled)
+    if (auth.project.eventNotifications) {
+      // Use createBulk for performance with multiple notifications
+      const notificationInputs = createdEventIds.map((evt) => ({
+        userId: auth.project.ownerId,
+        projectId: auth.project.id,
+        eventName: evt.eventName,
+        eventId: evt.eventId,
+      }));
+
+      // Fire and forget - don't block the response
+      notificationService
+        .createBulk(
+          notificationInputs.map((input) =>
+            notificationService.createEventNotification(
+              input.userId,
+              input.projectId,
+              input.eventName,
+              input.eventId,
+            ),
+          ),
+        )
+        .catch((err) => console.error("Failed to create event notifications:", err));
+    }
 
     return NextResponse.json(
       { success: true, eventsProcessed: events.length },

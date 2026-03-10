@@ -353,22 +353,6 @@ class NotificationService {
   }
 
   /**
-   * Get recent notifications (last 24 hours)
-   */
-  async getRecent(userId: string, projectId?: string) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    return await this.getNotifications({
-      userId,
-      projectId,
-      startDate: yesterday,
-      endDate: new Date(),
-      limit: 100,
-    });
-  }
-
-  /**
    * Create notification for new event
    */
   async createEventNotification(

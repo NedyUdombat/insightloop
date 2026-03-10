@@ -2,46 +2,12 @@
 
 import { Bell } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-
-// Dummy notifications data
-const DUMMY_NOTIFICATIONS = [
-  {
-    id: "1",
-    title: "New user signup",
-    message: "John Doe just signed up for your service",
-    timestamp: "2 minutes ago",
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Payment received",
-    message: "You received a payment of $99.00",
-    timestamp: "1 hour ago",
-    read: false,
-  },
-  {
-    id: "3",
-    title: "Server alert",
-    message: "High CPU usage detected on server-01",
-    timestamp: "3 hours ago",
-    read: true,
-  },
-  {
-    id: "4",
-    title: "New feature request",
-    message: "User requested dark mode toggle feature",
-    timestamp: "5 hours ago",
-    read: true,
-  },
-  {
-    id: "5",
-    title: "Deployment successful",
-    message: "Your latest deployment completed successfully",
-    timestamp: "1 day ago",
-    read: true,
-  },
-];
+import { useEffect, useMemo, useRef, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import useGetNotifications from "@/queries/notifications/useGetNotifications";
+import useGetUnreadCount from "@/queries/notifications/useGetUnreadCount";
+import useMarkAllAsRead from "@/queries/notifications/useMarkAllAsRead";
+import useMarkAsRead from "@/queries/notifications/useMarkAsRead";
 
 export default function NotificationDropdown() {
   const params = useParams();
@@ -49,6 +15,26 @@ export default function NotificationDropdown() {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Memoize query parameters to prevent infinite re-fetches
+  const queryParams = useMemo(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    return {
+      projectId,
+      startDate: yesterday.toISOString(),
+      endDate: new Date().toISOString(),
+      limit: 10,
+    };
+  }, [projectId]);
+
+  const { notifications, isPending: loadingNotifications } =
+    useGetNotifications(queryParams);
+
+  const { count: unreadCount } = useGetUnreadCount(projectId);
+  const { markAllAsRead, isPending: markingAllAsRead } = useMarkAllAsRead();
+  const { markAsRead } = useMarkAsRead();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -71,8 +57,13 @@ export default function NotificationDropdown() {
   }, [showNotifications]);
 
   const handleMarkAllAsRead = () => {
-    // This will be implemented with API later
-    console.log("Mark all as read");
+    markAllAsRead({ projectId });
+  };
+
+  const handleNotificationClick = (notificationId: string, isRead: boolean) => {
+    if (!isRead) {
+      markAsRead({ notificationIds: [notificationId] });
+    }
   };
 
   const handleViewAll = () => {
@@ -88,8 +79,12 @@ export default function NotificationDropdown() {
         className="text-neutral-400 hover:text-neutral-200 transition-colors relative cursor-pointer"
       >
         <Bell className="h-5 w-5" />
-        {/* Unread indicator */}
-        <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full" />
+        {/* Unread count badge */}
+        {unreadCount > 0 && (
+          <span className="absolute -top-2 -right-2 flex items-center justify-center h-5 w-5 bg-blue-500 text-white text-xs font-semibold rounded-full border-2 border-neutral-950">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
       </button>
 
       {/* Notifications Dropdown */}
@@ -100,44 +95,62 @@ export default function NotificationDropdown() {
             <h3 className="text-sm font-semibold text-neutral-100">
               Notifications
             </h3>
-            <button
-              type="button"
-              onClick={handleMarkAllAsRead}
-              className="text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-            >
-              Mark all as read
-            </button>
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllAsRead}
+                disabled={markingAllAsRead}
+                className="text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {markingAllAsRead ? "Marking..." : "Mark all as read"}
+              </button>
+            )}
           </div>
 
           {/* Notifications List */}
           <div className="max-h-96 overflow-y-auto">
-            {DUMMY_NOTIFICATIONS.map((notification) => (
-              <div
-                key={notification.id}
-                className={`px-4 py-3 border-b border-neutral-800 hover:bg-neutral-800/50 transition-colors cursor-pointer ${
-                  !notification.read ? "bg-neutral-800/30" : ""
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
-                      !notification.read ? "bg-blue-500" : "bg-transparent"
-                    }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-neutral-100 truncate">
-                      {notification.title}
-                    </p>
-                    <p className="text-sm text-neutral-400 mt-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-neutral-500 mt-1">
-                      {notification.timestamp}
-                    </p>
+            {loadingNotifications ? (
+              <div className="px-4 py-8 text-center text-neutral-400 text-sm">
+                Loading notifications...
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="px-4 py-8 text-center text-neutral-400 text-sm">
+                No recent notifications
+              </div>
+            ) : (
+              notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  onClick={() =>
+                    handleNotificationClick(notification.id, notification.read)
+                  }
+                  className={`px-4 py-3 border-b border-neutral-800 hover:bg-neutral-800/50 transition-colors cursor-pointer ${
+                    !notification.read ? "bg-neutral-800/30" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
+                        !notification.read ? "bg-blue-500" : "bg-transparent"
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-100 truncate">
+                        {notification.title}
+                      </p>
+                      <p className="text-sm text-neutral-400 mt-1 line-clamp-2">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        {formatDistanceToNow(new Date(notification.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Footer */}

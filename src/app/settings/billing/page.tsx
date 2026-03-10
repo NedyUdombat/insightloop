@@ -2,7 +2,7 @@
 
 import { ArrowLeft, CreditCard, Download, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Invoice {
   id: string;
@@ -25,6 +25,10 @@ interface PaymentMethod {
 export default function BillingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    router.push("/settings/profile");
+  }, [router]);
 
   // Mock data
   const currentPlan = {
