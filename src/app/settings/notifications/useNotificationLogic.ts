@@ -32,7 +32,8 @@ export const useNotificationLogic = () => {
     if (preferences) {
       setSettings({
         globalNotificationsEnabled: preferences.globalNotificationsEnabled,
-        notificationChannels: preferences.notificationChannels as NotificationChannel[],
+        notificationChannels:
+          preferences.notificationChannels as NotificationChannel[],
         quietHoursStart: dateToTimeString(preferences.quietHoursStart),
         quietHoursEnd: dateToTimeString(preferences.quietHoursEnd),
         digestFrequency: preferences.digestFrequency as DigestFrequency,

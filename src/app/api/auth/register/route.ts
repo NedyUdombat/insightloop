@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { email, password, firstname, lastname } = validatedData.data;
+  const { email, password, firstName, lastName } = validatedData.data;
   const normalizedEmail = email.toLowerCase();
 
   const ip = await getClientIp();
@@ -77,8 +77,8 @@ export async function POST(req: NextRequest) {
     const newUser = await userService.createUser({
       email: normalizedEmail,
       password: hashedPassword,
-      firstname,
-      lastname,
+      firstName,
+      lastName,
     });
 
     const user = await userService.serializeUser(newUser);
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       await emailService.sendVerificationEmail({
         to: user.email,
         token,
-        firstName: user.firstname,
+        firstName: user.firstName,
       });
     } catch (emailError) {
       console.error("Verification email failed to send", emailError);

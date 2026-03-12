@@ -1,4 +1,8 @@
-import { type UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type UseMutationResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { PublicUser } from "@/api/types/IUser";
 import type { UpdateUserInput } from "@/api/validators/user";
 import { updateUserProfile } from "./call";

@@ -9,7 +9,7 @@ export async function requireApiKey(_req: NextRequest) {
   const authHeader = headerStore.get("authorization");
   if (!authHeader?.startsWith("Bearer")) return null;
 
-  const rawKey = authHeader?.replace("Bearer", "");
+  const rawKey = authHeader?.replace("Bearer ", "").trim();
   const keyHash = await apiKeyService.hashApiKey(rawKey);
 
   const apiKey = await apiKeyService.fetchSingleApiKey({
@@ -50,7 +50,6 @@ export async function requireApiKey(_req: NextRequest) {
   });
 
   return {
-    apiKeyId: apiKey.id,
     apiKey: apiKey,
     project: apiKey.project,
     environmentWarning: misuse.isMisuse ? misuse.warning : undefined,

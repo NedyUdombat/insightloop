@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const [apiKeyLimit, projectLimit] = await Promise.all([
     rateLimitService.hit({
       key: "IDENTIFY",
-      identifier: auth.apiKeyId,
+      identifier: auth.apiKey.id,
       maxRequests: 1000,
       windowMs: 60 * 1000, // 1 minute
     }),
@@ -48,41 +48,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { userId, anonymousId, traits } = validatedData.data;
+  const { userId, email, firstName, lastName, traits } = validatedData.data;
 
   const endUserService = new EndUserService();
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Link anonymous user to identified user
-      return await endUserService.linkAnonymousToIdentified({
+    const endUser = await prisma.$transaction(async (tx) => {
+      return await endUserService.identify({
         projectId: auth.project.id,
         userId,
-        anonymousId,
+        email,
+        firstName,
+        lastName,
         traits,
         tx,
       });
     });
 
-    // Log identity linking for debugging (not audit log since no dashboard userId)
-    if (result.mergedCount > 0) {
-      console.log(
-        `[Identity] Linked ${result.eventsLinked} events and ${result.feedbacksLinked} feedbacks from ${result.mergedCount} anonymous user(s) to identified user ${userId}`,
-      );
-    }
-
     return NextResponse.json(
       {
         success: true,
-        endUserId: result.identifiedUser.id,
+        endUserId: endUser.id,
       },
       { status: 200 },
     );
   } catch (err) {
-    console.error("Identity linking failed", err);
-    return NextResponse.json(
-      { error: "Identity linking failed" },
-      { status: 500 },
-    );
+    console.error("Identify failed", err);
+    return NextResponse.json({ error: "Identify failed" }, { status: 500 });
   }
 }

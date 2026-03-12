@@ -11,9 +11,9 @@ export default function RegisterPage() {
     password,
     setPassword,
     error,
-    firstname,
+    firstName,
     setFirstname,
-    lastname,
+    lastName,
     setLastname,
     email,
     setEmail,
@@ -37,39 +37,39 @@ export default function RegisterPage() {
       <div className="space-y-4">
         <div>
           <input
-            name="firstname"
+            name="firstName"
             type="text"
             required
             autoComplete="given-name"
             placeholder="First name"
-            value={firstname}
+            value={firstName}
             onChange={(e) => setFirstname(e.target.value)}
-            onBlur={() => handleBlur("firstname")}
+            onBlur={() => handleBlur("firstName")}
             className={`w-full rounded-md bg-neutral-950 border px-3 py-2 text-sm ${
-              fieldErrors.firstname ? "border-red-500" : "border-neutral-800"
+              fieldErrors.firstName ? "border-red-500" : "border-neutral-800"
             }`}
           />
-          {fieldErrors.firstname && (
-            <p className="mt-1 text-xs text-red-500">{fieldErrors.firstname}</p>
+          {fieldErrors.firstName && (
+            <p className="mt-1 text-xs text-red-500">{fieldErrors.firstName}</p>
           )}
         </div>
 
         <div>
           <input
-            name="lastname"
+            name="lastName"
             type="text"
             required
             autoComplete="family-name"
             placeholder="Last name"
-            value={lastname}
+            value={lastName}
             onChange={(e) => setLastname(e.target.value)}
-            onBlur={() => handleBlur("lastname")}
+            onBlur={() => handleBlur("lastName")}
             className={`w-full rounded-md bg-neutral-950 border px-3 py-2 text-sm ${
-              fieldErrors.lastname ? "border-red-500" : "border-neutral-800"
+              fieldErrors.lastName ? "border-red-500" : "border-neutral-800"
             }`}
           />
-          {fieldErrors.lastname && (
-            <p className="mt-1 text-xs text-red-500">{fieldErrors.lastname}</p>
+          {fieldErrors.lastName && (
+            <p className="mt-1 text-xs text-red-500">{fieldErrors.lastName}</p>
           )}
         </div>
 

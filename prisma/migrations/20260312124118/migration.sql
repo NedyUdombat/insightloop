@@ -28,9 +28,11 @@ CREATE TYPE "DigestFrequency" AS ENUM ('REAL_TIME', 'DAILY', 'WEEKLY');
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
-    "firstname" TEXT NOT NULL,
-    "lastname" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "profileImage" TEXT,
     "password" TEXT NOT NULL,
     "role" "UserRole" NOT NULL DEFAULT 'USER',
     "bannedReason" TEXT,
@@ -106,9 +108,12 @@ CREATE TABLE "events" (
 -- CreateTable
 CREATE TABLE "end_users" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "anonymousId" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "externalUserId" TEXT,
+    "traits" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -290,13 +295,22 @@ CREATE INDEX "events_endUserId_eventTimestamp_idx" ON "events"("endUserId", "eve
 CREATE INDEX "events_projectId_idx" ON "events"("projectId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "end_users_anonymousId_key" ON "end_users"("anonymousId");
+
+-- CreateIndex
 CREATE INDEX "end_users_email_idx" ON "end_users"("email");
 
 -- CreateIndex
 CREATE INDEX "end_users_projectId_idx" ON "end_users"("projectId");
 
 -- CreateIndex
+CREATE INDEX "end_users_anonymousId_idx" ON "end_users"("anonymousId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "end_users_projectId_externalUserId_key" ON "end_users"("projectId", "externalUserId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "end_users_projectId_anonymousId_key" ON "end_users"("projectId", "anonymousId");
 
 -- CreateIndex
 CREATE INDEX "feedbacks_endUserId_idx" ON "feedbacks"("endUserId");

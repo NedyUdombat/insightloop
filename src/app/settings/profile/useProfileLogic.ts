@@ -29,8 +29,8 @@ export function useProfileLogic() {
   // Populate form fields when user data is loaded
   useEffect(() => {
     if (user) {
-      setFirstName(user.firstname || "");
-      setLastName(user.lastname || "");
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
       setEmail(user.email || "");
       setPhone(user.phone || "");
       setProfileImage(user.profileImage || null);
@@ -43,8 +43,8 @@ export function useProfileLogic() {
     try {
       // Update profile information
       await updateProfileAsync({
-        firstname: firstName,
-        lastname: lastName,
+        firstName: firstName,
+        lastName: lastName,
         phone: phone || undefined,
         profileImage: profileImage,
       });

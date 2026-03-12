@@ -13,8 +13,8 @@ const useRegister = () => {
     Error,
     RegisterPayload
   > = useMutation<GenericResponse<[]>, Error, RegisterPayload>({
-    mutationFn: async ({ email, password, firstname, lastname }) =>
-      register({ email, password, firstname, lastname }),
+    mutationFn: async ({ email, password, firstName, lastName }) =>
+      register({ email, password, firstName, lastName }),
     retry: false,
   });
 

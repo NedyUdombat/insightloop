@@ -355,12 +355,17 @@ class NotificationService {
   /**
    * Create notification for new event
    */
-  async createEventNotification(
-    userId: string,
-    projectId: string,
-    eventName: string,
-    eventId: string,
-  ) {
+  async createEventNotification({
+    userId,
+    projectId,
+    eventName,
+    eventId,
+  }: {
+    userId: string;
+    projectId: string;
+    eventName: string;
+    eventId: string;
+  }) {
     return await this.create({
       userId,
       projectId,

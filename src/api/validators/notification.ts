@@ -10,8 +10,14 @@ export const CreateNotificationSchema = z.strictObject({
   projectId: z.string().uuid().optional(),
   title: z.string().min(1).max(200),
   message: z.string().min(1).max(1000),
-  type: z.nativeEnum(NotificationType).optional().default(NotificationType.SYSTEM),
-  status: z.nativeEnum(NotificationStatus).optional().default(NotificationStatus.INFO),
+  type: z
+    .nativeEnum(NotificationType)
+    .optional()
+    .default(NotificationType.SYSTEM),
+  status: z
+    .nativeEnum(NotificationStatus)
+    .optional()
+    .default(NotificationStatus.INFO),
   notificationChannel: z
     .nativeEnum(NotificationChannel)
     .optional()
@@ -54,4 +60,6 @@ export const DeleteNotificationsSchema = z.strictObject({
   projectId: z.string().uuid().optional(),
 });
 
-export type DeleteNotificationsInput = z.infer<typeof DeleteNotificationsSchema>;
+export type DeleteNotificationsInput = z.infer<
+  typeof DeleteNotificationsSchema
+>;

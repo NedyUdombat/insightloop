@@ -21,10 +21,7 @@ import useMarkAsRead from "@/queries/notifications/useMarkAsRead";
 import useMarkAllAsRead from "@/queries/notifications/useMarkAllAsRead";
 import useDeleteNotifications from "@/queries/notifications/useDeleteNotifications";
 import useDeleteReadNotifications from "@/queries/notifications/useDeleteReadNotifications";
-import {
-  NotificationStatus,
-  NotificationType,
-} from "@/generated/prisma/enums";
+import { NotificationStatus, NotificationType } from "@/generated/prisma/enums";
 
 type FilterType = "all" | "unread";
 type CategoryFilterType = "all" | NotificationType;
@@ -445,7 +442,9 @@ export default function NotificationsPage() {
                       )}
                       <button
                         type="button"
-                        onClick={() => handleDeleteNotification(notification.id)}
+                        onClick={() =>
+                          handleDeleteNotification(notification.id)
+                        }
                         className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 cursor-pointer"
                       >
                         <Trash2 className="h-3 w-3" />

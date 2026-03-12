@@ -24,12 +24,12 @@ export const PATCH = requireAuth(async (req) => {
 
   const updateData: UpdateUserInput = {} as UpdateUserInput;
 
-  if (validatedUserData.firstname) {
-    updateData.firstname = validatedUserData.firstname;
+  if (validatedUserData.firstName) {
+    updateData.firstName = validatedUserData.firstName;
   }
 
-  if (validatedUserData.lastname) {
-    updateData.lastname = validatedUserData.lastname;
+  if (validatedUserData.lastName) {
+    updateData.lastName = validatedUserData.lastName;
   }
 
   if (validatedUserData.phone !== undefined) {

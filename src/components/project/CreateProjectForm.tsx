@@ -189,7 +189,10 @@ export default function CreateProjectForm({
                         description="Generate notifications for new feedback"
                         checked={settings.feedbackNotifications}
                         onChange={(checked) =>
-                          setSettings({ ...settings, feedbackNotifications: checked })
+                          setSettings({
+                            ...settings,
+                            feedbackNotifications: checked,
+                          })
                         }
                       />
 
@@ -198,7 +201,10 @@ export default function CreateProjectForm({
                         description="Generate notifications for system events"
                         checked={settings.systemNotifications}
                         onChange={(checked) =>
-                          setSettings({ ...settings, systemNotifications: checked })
+                          setSettings({
+                            ...settings,
+                            systemNotifications: checked,
+                          })
                         }
                       />
 
@@ -207,7 +213,10 @@ export default function CreateProjectForm({
                         description="Generate notifications for security events"
                         checked={settings.securityNotifications}
                         onChange={(checked) =>
-                          setSettings({ ...settings, securityNotifications: checked })
+                          setSettings({
+                            ...settings,
+                            securityNotifications: checked,
+                          })
                         }
                       />
                     </div>

@@ -9,12 +9,14 @@ const useGetNotifications = (params: GetNotificationsParams = {}) => {
     isError,
     error,
     refetch,
-  }: UseQueryResult<GenericResponse<GetNotificationsResponse>, Error> =
-    useQuery<GenericResponse<GetNotificationsResponse>, Error>({
-      queryKey: ["notifications", params],
-      queryFn: () => getNotifications(params),
-      retry: false,
-    });
+  }: UseQueryResult<
+    GenericResponse<GetNotificationsResponse>,
+    Error
+  > = useQuery<GenericResponse<GetNotificationsResponse>, Error>({
+    queryKey: ["notifications", params],
+    queryFn: () => getNotifications(params),
+    retry: false,
+  });
 
   return {
     notifications: data?.data?.notifications || [],

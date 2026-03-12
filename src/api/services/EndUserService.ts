@@ -1,19 +1,68 @@
+import { randomUUID } from "node:crypto";
 import type { Prisma } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
-import type { IEndUser } from "../types/IEndUser";
 
 class EndUserService {
+  async identify({
+    projectId,
+    userId,
+    email,
+    firstName,
+    lastName,
+    traits,
+    tx,
+  }: {
+    projectId: string;
+    userId: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    traits?: Record<string, any>;
+    tx?: Prisma.TransactionClient;
+  }) {
+    const db = tx ?? prisma;
+
+    return db.endUser.upsert({
+      where: {
+        projectId_externalUserId: {
+          projectId,
+          externalUserId: userId,
+        },
+      },
+      create: {
+        projectId,
+        externalUserId: userId,
+        anonymousId: userId,
+        email: email ?? "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        traits: traits ?? null,
+      },
+      update: {
+        // Update all fields EXCEPT externalUserId and anonymousId
+        email: email ?? undefined,
+        firstName: firstName ?? undefined,
+        lastName: lastName ?? undefined,
+        traits: traits ?? undefined,
+      },
+    });
+  }
+
   async resolveEndUser({
     projectId,
     externalUserId,
     email,
-    name,
+    firstName,
+    lastName,
+    traits,
     tx,
   }: {
     projectId: string;
     externalUserId?: string | null;
     email?: string | null;
-    name?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    traits?: Record<string, any>;
     tx?: Prisma.TransactionClient;
   }) {
     const db = tx ?? prisma;
@@ -22,7 +71,9 @@ class EndUserService {
         projectId,
         externalUserId: null,
         email,
-        name,
+        firstName,
+        lastName,
+        traits,
         tx: db,
       });
     }
@@ -37,12 +88,17 @@ class EndUserService {
       create: {
         projectId,
         externalUserId,
-        email,
-        name,
+        anonymousId: randomUUID(),
+        email: email ?? "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        traits: traits ?? null,
       },
       update: {
         email: email ?? undefined,
-        name: name ?? undefined,
+        firstName: firstName ?? undefined,
+        lastName: lastName ?? undefined,
+        traits: traits ?? undefined,
       },
     });
   }
@@ -51,13 +107,17 @@ class EndUserService {
     projectId,
     externalUserId,
     email,
-    name,
+    firstName,
+    lastName,
+    traits,
     tx,
   }: {
     projectId: string;
     externalUserId: string | null;
     email?: string | null;
-    name?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    traits?: Record<string, any>;
     tx?: Prisma.TransactionClient;
   }) {
     const db = tx ?? prisma;
@@ -66,113 +126,13 @@ class EndUserService {
       data: {
         projectId,
         externalUserId,
-        email,
-        name,
+        anonymousId: randomUUID(),
+        email: email ?? "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        traits: traits ?? null,
       },
     });
-  }
-
-  async linkAnonymousToIdentified({
-    projectId,
-    userId,
-    anonymousId,
-    traits,
-    tx,
-  }: {
-    projectId: string;
-    userId: string;
-    anonymousId: string;
-    traits?: {
-      email?: string;
-      name?: string;
-      [key: string]: unknown;
-    };
-    tx?: Prisma.TransactionClient;
-  }) {
-    const db = tx ?? prisma;
-
-    // Step 1: Resolve or create the identified user
-    const identifiedUser = await db.endUser.upsert({
-      where: {
-        projectId_externalUserId: {
-          projectId,
-          externalUserId: userId,
-        },
-      },
-      create: {
-        projectId,
-        externalUserId: userId,
-        email: traits?.email ?? null,
-        name: traits?.name ?? null,
-      },
-      update: {
-        email: traits?.email ?? undefined,
-        name: traits?.name ?? undefined,
-      },
-    });
-
-    // Step 2: Find anonymous EndUser(s) with this anonymousId
-    // Note: There could be multiple if the anonymousId was reused after logout
-    const anonymousUsers = await db.endUser.findMany({
-      where: {
-        projectId,
-        externalUserId: anonymousId,
-        deletedAt: null, // Only active anonymous users
-      },
-    });
-
-    // Edge case: anonymousId and userId resolve to same EndUser (already identified)
-    // Filter out the identified user itself
-    const anonymousUsersToMerge = anonymousUsers.filter(
-      (u: IEndUser) => u.id !== identifiedUser.id,
-    );
-
-    // If no anonymous users to merge, this is a no-op (idempotent)
-    if (anonymousUsersToMerge.length === 0) {
-      return {
-        identifiedUser,
-        mergedCount: 0,
-      };
-    }
-
-    // Step 3: Link all events from anonymous users to identified user
-    const anonymousUserIds = anonymousUsersToMerge.map((u: IEndUser) => u.id);
-
-    const [eventsUpdated, feedbacksUpdated] = await Promise.all([
-      db.event.updateMany({
-        where: {
-          endUserId: { in: anonymousUserIds },
-        },
-        data: {
-          endUserId: identifiedUser.id,
-        },
-      }),
-      db.feedback.updateMany({
-        where: {
-          endUserId: { in: anonymousUserIds },
-        },
-        data: {
-          endUserId: identifiedUser.id,
-        },
-      }),
-    ]);
-
-    // Step 4: Soft-delete the anonymous EndUser records
-    await db.endUser.updateMany({
-      where: {
-        id: { in: anonymousUserIds },
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-
-    return {
-      identifiedUser,
-      mergedCount: anonymousUsersToMerge.length,
-      eventsLinked: eventsUpdated.count,
-      feedbacksLinked: feedbacksUpdated.count,
-    };
   }
 }
 

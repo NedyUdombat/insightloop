@@ -74,7 +74,7 @@ export default function EventRow({ event }: EventRowProps) {
         <td className="px-6 py-4">
           <div className="text-sm font-medium text-neutral-300">
             {event.endUser?.email ||
-              event.endUser?.name ||
+              `${event.endUser?.firstName} ${event.endUser?.lastName}` ||
               event.endUser?.externalUserId ||
               event.endUserId || <span className="text-neutral-500">—</span>}
           </div>
@@ -105,11 +105,11 @@ export default function EventRow({ event }: EventRowProps) {
                   </div>
                   <div className="rounded-lg border border-neutral-800/60 bg-neutral-900/40 p-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                      {event.endUser.name && (
+                      {event.endUser.firstName && (
                         <div>
                           <span className="text-neutral-500">Name:</span>
                           <span className="ml-2 text-neutral-200">
-                            {event.endUser.name}
+                            {`${event.endUser?.firstName} ${event.endUser?.lastName}`}
                           </span>
                         </div>
                       )}

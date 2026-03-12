@@ -48,7 +48,9 @@ export const GET = requireAuth(async (req) => {
       ...feedbackData.feedbacks.map((feedback) => ({
         ...feedbackService.serializeFeedback(feedback),
         type: "feedback" as const,
-        timestamp: feedback.feedbackTimestamp?.toISOString() || feedback.createdAt.toISOString(),
+        timestamp:
+          feedback.feedbackTimestamp?.toISOString() ||
+          feedback.createdAt.toISOString(),
       })),
     ]
       .sort(

@@ -13,6 +13,7 @@ class EventService {
     projectId,
     endUserId,
     environment,
+    metadata,
   }: {
     projectId: string;
     eventName: string;
@@ -21,6 +22,7 @@ class EventService {
     endUserId?: string | null;
     tx?: PrismaClient;
     environment: Environment;
+    metadata?: Record<string, unknown> | null;
   }) {
     const db = tx ?? prisma;
 
@@ -32,6 +34,7 @@ class EventService {
         eventTimestamp: eventTimeStamp,
         properties,
         environment,
+        metadata,
       },
     });
   }
@@ -106,9 +109,11 @@ class EventService {
         endUser: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             externalUserId: true,
+            anonymousId: true,
           },
         },
       },
@@ -149,7 +154,8 @@ class EventService {
           endUser: {
             OR: [
               { email: { contains: search, mode: "insensitive" as const } },
-              { name: { contains: search, mode: "insensitive" as const } },
+              { firstName: { contains: search, mode: "insensitive" as const } },
+              { lastName: { contains: search, mode: "insensitive" as const } },
               {
                 externalUserId: {
                   contains: search,
@@ -200,9 +206,11 @@ class EventService {
           endUser: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               externalUserId: true,
+              anonymousId: true,
             },
           },
         },
@@ -234,9 +242,12 @@ class EventService {
       endUser: event.endUser
         ? {
             id: event.endUser.id,
-            name: event.endUser.name,
+            firstName: event.endUser.firstName,
+            lastName: event.endUser.lastName,
+            anonymousId: event.endUser.anonymousId,
             email: event.endUser.email,
             externalUserId: event.endUser.externalUserId,
+            traits: event.endUser.traits,
           }
         : null,
       environment: event.environment,

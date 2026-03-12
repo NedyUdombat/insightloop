@@ -1,14 +1,13 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
+  ApiKeyType,
+  DigestFrequency,
   Environment,
   FeedbackStatus,
-  PrismaClient,
-  ApiKeyType,
-  NotificationType,
-  NotificationStatus,
   NotificationChannel,
-  DigestFrequency,
-  UserRole,
+  NotificationStatus,
+  NotificationType,
+  PrismaClient,
 } from "@/generated/prisma/client";
 import "dotenv/config";
 import { Pool } from "pg";
@@ -35,11 +34,19 @@ async function main() {
       update: {},
       create: {
         email: "nedyudombat@gmail.com",
-        firstname: "Nedy",
-        lastname: "Udombat",
+        firstName: "Nedy",
+        lastName: "Udombat",
+        phone: "+2348012345678",
+        profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nedy",
         emailVerified: true,
         emailVerifiedAt: new Date(),
         password,
+        globalNotificationsEnabled: true,
+        notificationChannels: [
+          NotificationChannel.IN_APP,
+          NotificationChannel.EMAIL,
+        ],
+        digestFrequency: DigestFrequency.REAL_TIME,
       },
     });
     console.log("User seeded:", user);
@@ -64,7 +71,7 @@ async function main() {
     const crypto = await import("node:crypto");
 
     // Development Ingestion Key
-    const devPrefix = "il_pk_dev";
+    const devPrefix = "il_pk_test";
     const devEntropy = crypto.randomBytes(32).toString("hex");
     const devApiKeyValue = `${devPrefix}_${devEntropy}`;
     const devApiKeyHash = crypto
@@ -88,7 +95,7 @@ async function main() {
     console.log("Development API Key seeded:", devApiKey);
 
     // Production Ingestion Key
-    const prodPrefix = "il_pk_prod";
+    const prodPrefix = "il_pk_live";
     const prodEntropy = crypto.randomBytes(32).toString("hex");
     const prodApiKeyValue = `${prodPrefix}_${prodEntropy}`;
     const prodApiKeyHash = crypto
@@ -113,7 +120,7 @@ async function main() {
     console.log("Production API Key seeded:", prodApiKey);
 
     // Management Key (no keyValue stored for security)
-    const mgmtPrefix = "il_sk_prod";
+    const mgmtPrefix = "il_sk_live";
     const mgmtEntropy = crypto.randomBytes(32).toString("hex");
     const mgmtApiKeyValue = `${mgmtPrefix}_${mgmtEntropy}`;
     const mgmtApiKeyHash = crypto
@@ -141,7 +148,9 @@ async function main() {
     const endUsers = await Promise.all([
       tx.endUser.create({
         data: {
-          name: "Sarah Johnson",
+          anonymousId: crypto.randomUUID(),
+          firstName: "Sarah",
+          lastName: "Johnson",
           email: "sarah.johnson@example.com",
           externalUserId: "user_001",
           projectId: project.id,
@@ -149,7 +158,9 @@ async function main() {
       }),
       tx.endUser.create({
         data: {
-          name: "Michael Chen",
+          anonymousId: crypto.randomUUID(),
+          firstName: "Michael",
+          lastName: "Chen",
           email: "michael.chen@example.com",
           externalUserId: "user_002",
           projectId: project.id,
@@ -157,7 +168,9 @@ async function main() {
       }),
       tx.endUser.create({
         data: {
-          name: "Emily Rodriguez",
+          anonymousId: crypto.randomUUID(),
+          firstName: "Emily",
+          lastName: "Rodriguez",
           email: "emily.rodriguez@example.com",
           externalUserId: "user_003",
           projectId: project.id,
@@ -165,7 +178,9 @@ async function main() {
       }),
       tx.endUser.create({
         data: {
-          name: "David Kim",
+          anonymousId: crypto.randomUUID(),
+          firstName: "David",
+          lastName: "Kim",
           email: "david.kim@example.com",
           externalUserId: "user_004",
           projectId: project.id,
@@ -173,14 +188,18 @@ async function main() {
       }),
       tx.endUser.create({
         data: {
-          name: "Anonymous User",
+          anonymousId: crypto.randomUUID(),
+          firstName: "Anonymous",
+          lastName: "User",
           email: "anon_1@anonymous.local",
           projectId: project.id,
         },
       }),
       tx.endUser.create({
         data: {
-          name: "Anonymous User",
+          anonymousId: crypto.randomUUID(),
+          firstName: "Anonymous",
+          lastName: "User",
           email: "anon_2@anonymous.local",
           projectId: project.id,
         },
@@ -381,7 +400,9 @@ async function main() {
             properties: event.props,
             metadata: {
               browser: ["Chrome", "Firefox", "Safari", "Edge"][userIndex % 4],
-              browser_version: ["120.0.0", "119.0.1", "17.2", "120.0.1"][userIndex % 4],
+              browser_version: ["120.0.0", "119.0.1", "17.2", "120.0.1"][
+                userIndex % 4
+              ],
               os: ["MacOS", "Windows", "Linux", "Android"][userIndex % 4],
               os_version: ["14.2", "11", "6.5.0", "14"][userIndex % 4],
               device_type: ["Desktop", "Mobile", "Tablet"][userIndex % 3],
@@ -390,7 +411,10 @@ async function main() {
               current_url: `https://shop.naijamall.ng/${event.name}`,
               host: "shop.naijamall.ng",
               pathname: `/${event.name}`,
-              referrer: userIndex % 2 === 0 ? "https://google.com" : "https://shop.naijamall.ng",
+              referrer:
+                userIndex % 2 === 0
+                  ? "https://google.com"
+                  : "https://shop.naijamall.ng",
               geoip_country_name: [
                 "Nigeria",
                 "Kenya",
@@ -399,7 +423,9 @@ async function main() {
                 "Egypt",
                 "Ethiopia",
               ][userIndex % 6],
-              geoip_country_code: ["NG", "KE", "ZA", "GH", "EG", "ET"][userIndex % 6],
+              geoip_country_code: ["NG", "KE", "ZA", "GH", "EG", "ET"][
+                userIndex % 6
+              ],
               geoip_city_name: [
                 "Lagos",
                 "Nairobi",
@@ -423,9 +449,11 @@ async function main() {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:119.0) Gecko/20100101 Firefox/119.0",
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
               ][userIndex % 4],
-              locale: ["en-NG", "en-KE", "en-ZA", "en-GH", "ar-EG", "am-ET"][userIndex % 6],
+              locale: ["en-NG", "en-KE", "en-ZA", "en-GH", "ar-EG", "am-ET"][
+                userIndex % 6
+              ],
             },
           });
         }
@@ -480,14 +508,16 @@ async function main() {
           geoip_country_name: ["Nigeria", "Ghana", "Kenya"][i % 3],
           geoip_country_code: ["NG", "GH", "KE"][i % 3],
           geoip_city_name: ["Abuja", "Kumasi", "Nairobi"][i % 3],
-          geoip_timezone: ["Africa/Lagos", "Africa/Accra", "Africa/Nairobi"][i % 3],
+          geoip_timezone: ["Africa/Lagos", "Africa/Accra", "Africa/Nairobi"][
+            i % 3
+          ],
           lib: "insightloop-browser",
           lib_version: "1.102.1",
           ip: `102.89.${i}.${Math.floor(Math.random() * 255)}`,
           user_agent: [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
-            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
           ][i % 3],
           locale: ["en-NG", "en-GH", "en-KE"][i % 3],
         },
@@ -670,7 +700,8 @@ async function main() {
           }`,
           host: "shop.naijamall.ng",
           pathname: `/${["checkout", "products", "dashboard", "search"][i % 4]}`,
-          referrer: i % 2 === 0 ? "https://shop.naijamall.ng" : "https://google.com",
+          referrer:
+            i % 2 === 0 ? "https://shop.naijamall.ng" : "https://google.com",
           geoip_country_name: ["Nigeria", "Kenya", "South Africa", "Ghana"][
             i % 4
           ],
@@ -678,7 +709,12 @@ async function main() {
           geoip_city_name: ["Port Harcourt", "Mombasa", "Cape Town", "Kumasi"][
             i % 4
           ],
-          geoip_timezone: ["Africa/Lagos", "Africa/Nairobi", "Africa/Johannesburg", "Africa/Accra"][i % 4],
+          geoip_timezone: [
+            "Africa/Lagos",
+            "Africa/Nairobi",
+            "Africa/Johannesburg",
+            "Africa/Accra",
+          ][i % 4],
           lib: "insightloop-browser",
           lib_version: "1.102.1",
           ip: `197.210.${i + 50}.${Math.floor(Math.random() * 255)}`,
@@ -686,7 +722,7 @@ async function main() {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.1"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.1",
           ][i % 4],
           locale: ["en-NG", "en-KE", "en-ZA", "en-GH"][i % 4],
           viewport_width: [1920, 390, 768][i % 3],
@@ -737,7 +773,8 @@ async function main() {
       },
       {
         title: "System maintenance scheduled",
-        message: "Scheduled maintenance on March 15th from 2:00 AM - 4:00 AM UTC",
+        message:
+          "Scheduled maintenance on March 15th from 2:00 AM - 4:00 AM UTC",
         type: NotificationType.SYSTEM,
         status: NotificationStatus.INFO,
         actionUrl: null,
@@ -781,7 +818,8 @@ async function main() {
         read: template.read,
         readAt: template.read ? new Date(baseTime - i * 3600000) : null,
         userId: user.id,
-        projectId: template.type === NotificationType.SYSTEM ? null : project.id,
+        projectId:
+          template.type === NotificationType.SYSTEM ? null : project.id,
         data: {
           priority: ["low", "medium", "high"][i % 3],
           source: "system",
@@ -803,7 +841,8 @@ async function main() {
       userId: user.id,
       sessionId: crypto.randomUUID(),
       csrfToken: crypto.randomBytes(32).toString("hex"),
-      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       ip: "197.210.70.45",
       expiresAt: new Date(now + 7 * 24 * 60 * 60 * 1000), // 7 days
       maxExpiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000), // 30 days
@@ -887,7 +926,8 @@ async function main() {
         userId: user.id,
         action: log.action,
         metadata: log.metadata,
-        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
         ip: "197.210.70.45",
         createdAt: new Date(now - log.timeOffset),
       });

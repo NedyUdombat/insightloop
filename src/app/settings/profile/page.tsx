@@ -1,6 +1,14 @@
 "use client";
 
-import { ArrowLeft, Camera, Loader2, Save, X, CheckCircle2, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  Loader2,
+  Save,
+  X,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import * as Toast from "@radix-ui/react-toast";
 import { useProfileLogic } from "./useProfileLogic";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
@@ -51,8 +59,12 @@ export default function ProfilePage() {
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Back</span>
           </button>
-          <h1 className="text-3xl font-semibold text-white mb-2">Profile Settings</h1>
-          <p className="text-neutral-400">Manage your personal information and preferences</p>
+          <h1 className="text-3xl font-semibold text-white mb-2">
+            Profile Settings
+          </h1>
+          <p className="text-neutral-400">
+            Manage your personal information and preferences
+          </p>
         </div>
 
         {/* Tabs */}
@@ -88,14 +100,23 @@ export default function ProfilePage() {
           <form onSubmit={handleProfileSubmit}>
             {/* Profile Picture Section */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-medium text-white mb-4">Profile Picture</h2>
+              <h2 className="text-lg font-medium text-white mb-4">
+                Profile Picture
+              </h2>
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 text-2xl font-semibold overflow-hidden">
                     {profileImage ? (
-                      <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                      <img
+                        src={profileImage}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
-                      <span>{firstName?.[0] || "U"}{lastName?.[0] || ""}</span>
+                      <span>
+                        {firstName?.[0] || "U"}
+                        {lastName?.[0] || ""}
+                      </span>
                     )}
                   </div>
                   <button
@@ -128,10 +149,15 @@ export default function ProfilePage() {
 
             {/* Personal Information Section */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-medium text-white mb-4">Personal Information</h2>
+              <h2 className="text-lg font-medium text-white mb-4">
+                Personal Information
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-neutral-300 mb-2"
+                  >
                     First Name
                   </label>
                   <input
@@ -146,7 +172,10 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-neutral-300 mb-2"
+                  >
                     Last Name
                   </label>
                   <input
@@ -161,7 +190,10 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-neutral-300 mb-2"
+                  >
                     Email
                   </label>
                   <input
@@ -173,11 +205,16 @@ export default function ProfilePage() {
                     placeholder="john.doe@example.com"
                     className="w-full px-3 py-2 bg-neutral-900 border border-neutral-800 rounded-md text-sm text-neutral-500 placeholder-neutral-500 cursor-not-allowed"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">Email cannot be changed</p>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Email cannot be changed
+                  </p>
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-neutral-300 mb-2"
+                  >
                     Phone Number
                   </label>
                   <input
@@ -228,10 +265,15 @@ export default function ProfilePage() {
           <form onSubmit={handlePasswordSubmit}>
             {/* Password Section */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-medium text-white mb-4">Change Password</h2>
+              <h2 className="text-lg font-medium text-white mb-4">
+                Change Password
+              </h2>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label
+                    htmlFor="currentPassword"
+                    className="block text-sm font-medium text-neutral-300 mb-2"
+                  >
                     Current Password
                   </label>
                   <input
@@ -245,7 +287,10 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label
+                    htmlFor="newPassword"
+                    className="block text-sm font-medium text-neutral-300 mb-2"
+                  >
                     New Password
                   </label>
                   <input

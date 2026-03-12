@@ -4,7 +4,6 @@ import notificationService from "@/api/services/NotificationService";
 import { UpdateNotificationPreferencesSchema } from "@/api/validators/user";
 
 export const GET = requireAuth(async (req) => {
-
   try {
     const preferences = await notificationService.getPreferences(req.user.id);
 

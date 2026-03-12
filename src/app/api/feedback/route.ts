@@ -3,8 +3,8 @@ import { prisma } from "@/api/lib/db";
 import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
 import FeedbackService from "@/api/services/FeedbackService";
-import RateLimitService from "@/api/services/RateLimitService";
 import notificationService from "@/api/services/NotificationService";
+import RateLimitService from "@/api/services/RateLimitService";
 import { SDKFeedbackSchema } from "@/api/validators/feedback";
 
 const MAX_PAYLOAD_BYTES = 24 * 1024; // feedback should be smaller
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const [apiKeyLimit, projectLimit] = await Promise.all([
     rateLimitService.hit({
       key: "FEEDBACK_INGEST",
-      identifier: auth.apiKeyId,
+      identifier: auth.apiKey.id,
       maxRequests: 1000,
       windowMs: 60 * 1000, // 1 minute
     }),
@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
         projectId: auth.project.id,
         externalUserId,
         email: null, // Feedback doesn't carry email/name (only identify does)
-        name: null,
+        firstName: null,
+        lastName: null,
         tx,
       });
 
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
       const createdFeedback = await feedbackService.createFeedback({
         projectId: auth.project.id,
         endUserId: resolvedEndUser?.id,
-        message: feedback.text, // SDK uses "text", backend uses "message"
+        message: feedback.message, // SDK uses "text", backend uses "message"
         environment: auth.apiKey.environment,
         metadata,
         feedbackTimestamp: feedback.feedbackTimestamp
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
 
       createdFeedbackId = createdFeedback.id;
       feedbackRating = feedback.rating || null;
-      feedbackMessage = feedback.text || null;
+      feedbackMessage = feedback.message || null;
     });
 
     // Create notification after transaction completes (if enabled)

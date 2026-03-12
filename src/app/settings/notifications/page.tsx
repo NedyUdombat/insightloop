@@ -205,9 +205,7 @@ export default function NotificationsPage() {
                   <Bell className="w-5 h-5 text-neutral-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-neutral-300">
-                    In-App
-                  </p>
+                  <p className="text-sm font-medium text-neutral-300">In-App</p>
                   <p className="text-xs text-neutral-500">
                     Notifications within the application
                   </p>

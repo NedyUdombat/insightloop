@@ -56,7 +56,7 @@ export async function POST(_req: NextRequest) {
 
     await emailService.sendVerificationEmail({
       to: user.email,
-      firstName: user.firstname,
+      firstName: user.firstName,
       token,
     });
 

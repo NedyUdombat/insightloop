@@ -15,7 +15,7 @@ export interface IProject extends IModel {
   securityNotifications: boolean;
 
   // Project Settings
-  autoArchive: boolean; 
+  autoArchive: boolean;
   retentionDays: number;
   defaultEnvironment: Environment;
 

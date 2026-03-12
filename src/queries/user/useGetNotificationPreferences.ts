@@ -1,5 +1,8 @@
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
-import { getNotificationPreferences, type NotificationPreferences } from "./call";
+import {
+  getNotificationPreferences,
+  type NotificationPreferences,
+} from "./call";
 
 const useGetNotificationPreferences = () => {
   const {

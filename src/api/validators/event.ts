@@ -11,8 +11,13 @@ export const EventSchema = z.strictObject({
   eventName: z.string().trim().max(100).min(3),
   eventTimestamp: z.date().optional(), // ISO string from SDK
   userId: z.string().optional().nullable(), // SDK field name
-  anonymousId: z.string().optional(), // SDK field name
   properties: z
+    .record(
+      z.string(),
+      z.union([z.string(), z.number(), z.boolean(), z.null()]),
+    )
+    .optional(),
+  metadata: z
     .record(
       z.string(),
       z.union([z.string(), z.number(), z.boolean(), z.null()]),
@@ -22,7 +27,7 @@ export const EventSchema = z.strictObject({
 
 // Batch event schema to support SDK batching
 export const BatchEventSchema = z.object({
-  dataset: z.string().optional(),
+  environment: z.string().optional(),
   events: z.array(EventSchema),
 });
 

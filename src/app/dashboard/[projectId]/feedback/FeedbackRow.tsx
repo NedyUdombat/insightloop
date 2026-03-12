@@ -108,7 +108,8 @@ export default function FeedbackRow({ feedback }: FeedbackRowProps) {
         <td className="px-6 py-4">
           <div className="text-sm font-medium text-neutral-300">
             {feedback.endUser?.email ||
-              feedback.endUser?.name ||
+              `${feedback.endUser?.firstName} ${feedback.endUser?.lastName}` ||
+              feedback.endUser?.externalUserId ||
               feedback.endUserId || <span className="text-neutral-500">—</span>}
           </div>
         </td>
@@ -200,11 +201,11 @@ export default function FeedbackRow({ feedback }: FeedbackRowProps) {
                   </div>
                   <div className="rounded-lg border border-neutral-800/60 bg-neutral-900/40 p-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                      {feedback.endUser.name && (
+                      {feedback.endUser.firstName && (
                         <div>
                           <span className="text-neutral-500">Name:</span>
                           <span className="ml-2 text-neutral-200">
-                            {feedback.endUser.name}
+                            {`${feedback.endUser?.firstName} ${feedback.endUser?.lastName}`}
                           </span>
                         </div>
                       )}

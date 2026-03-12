@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     await emailService.sendPasswordResetEmail({
       to: user.email,
-      firstName: user.firstname,
+      firstName: user.firstName,
       token,
     });
 

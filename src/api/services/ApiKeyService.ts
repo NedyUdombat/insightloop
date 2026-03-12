@@ -25,7 +25,8 @@ class ApiKeyService {
 
     const entropy = crypto.randomBytes(32).toString("hex");
     const raw = `${prefix}_${entropy}`;
-    const hash = crypto.createHash("sha256").update(raw).digest("hex");
+    const hash = await this.hashApiKey(raw);
+    // const hash = crypto.createHash("sha256").update(raw).digest("hex");
     // Hint for UI: "il_pk_live_abcd...1234"
     const keyHint = `${prefix}_${entropy.slice(0, 4)}...${entropy.slice(-4)}`;
 

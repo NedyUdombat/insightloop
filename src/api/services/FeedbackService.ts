@@ -97,9 +97,11 @@ class FeedbackService {
           endUser: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               externalUserId: true,
+              anonymousId: true,
             },
           },
         },
@@ -138,9 +140,11 @@ class FeedbackService {
         endUser: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             externalUserId: true,
+            anonymousId: true,
           },
         },
       },
@@ -178,9 +182,11 @@ class FeedbackService {
         endUser: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             externalUserId: true,
+            anonymousId: true,
           },
         },
       },
@@ -204,9 +210,12 @@ class FeedbackService {
       endUser: feedback.endUser
         ? {
             id: feedback.endUser.id,
-            name: feedback.endUser.name,
+            firstName: feedback.endUser.firstName,
+            lastName: feedback.endUser.lastName,
+            anonymousId: feedback.endUser.anonymousId,
             email: feedback.endUser.email,
             externalUserId: feedback.endUser.externalUserId,
+            traits: feedback.endUser.traits,
           }
         : null,
     };

@@ -6,15 +6,15 @@ import useRegister from "@/queries/auth/useRegister";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type FieldErrors = {
-  firstname?: string;
-  lastname?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
 };
 
 const useRegisterAccount = () => {
   const router = useRouter();
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
+  const [firstName, setFirstname] = useState("");
+  const [lastName, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -24,12 +24,12 @@ const useRegisterAccount = () => {
   const fieldErrors = useMemo((): FieldErrors => {
     const errors: FieldErrors = {};
 
-    if (touched.firstname && firstname.trim().length === 0) {
-      errors.firstname = "First name is required";
+    if (touched.firstName && firstName.trim().length === 0) {
+      errors.firstName = "First name is required";
     }
 
-    if (touched.lastname && lastname.trim().length === 0) {
-      errors.lastname = "Last name is required";
+    if (touched.lastName && lastName.trim().length === 0) {
+      errors.lastName = "Last name is required";
     }
 
     if (touched.email && !EMAIL_REGEX.test(email)) {
@@ -37,16 +37,16 @@ const useRegisterAccount = () => {
     }
 
     return errors;
-  }, [firstname, lastname, email, touched]);
+  }, [firstName, lastName, email, touched]);
 
   const isFormValid = useMemo(() => {
     return (
-      firstname.trim().length > 0 &&
-      lastname.trim().length > 0 &&
+      firstName.trim().length > 0 &&
+      lastName.trim().length > 0 &&
       EMAIL_REGEX.test(email) &&
       isPasswordStrong(password)
     );
-  }, [firstname, lastname, email, password]);
+  }, [firstName, lastName, email, password]);
 
   function handleBlur(field: string) {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -55,12 +55,12 @@ const useRegisterAccount = () => {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    setTouched({ firstname: true, lastname: true, email: true });
+    setTouched({ firstName: true, lastName: true, email: true });
 
     if (!isFormValid) return;
 
     register(
-      { email, password, firstname, lastname },
+      { email, password, firstName, lastName },
       {
         onSuccess: () => {
           router.push("/auth/verify-email");
@@ -71,9 +71,9 @@ const useRegisterAccount = () => {
 
   return {
     handleSubmit,
-    firstname,
+    firstName,
     setFirstname,
-    lastname,
+    lastName,
     setLastname,
     email,
     setEmail,

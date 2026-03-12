@@ -1,16 +1,11 @@
 import * as z from "zod";
 
 export const IdentifySchema = z.object({
-  dataset: z.string().optional(),
   userId: z.string().min(1).max(256),
-  anonymousId: z.string().min(1).max(256),
-  traits: z
-    .object({
-      email: z.string().email().optional(),
-      name: z.string().max(256).optional(),
-    })
-    .passthrough() // Allow additional custom traits
-    .optional(),
+  email: z.email().optional(),
+  firstName: z.string().max(256).optional(),
+  lastName: z.string().max(256).optional(),
+  traits: z.record(z.string(), z.unknown()).optional(), // Allows any key-value pairs
 });
 
 export type IdentifyPayload = z.infer<typeof IdentifySchema>;

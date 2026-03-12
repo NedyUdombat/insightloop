@@ -15,8 +15,8 @@ datasource db {
 
 model User {
   id             String   @id @default(uuid(7))
-  firstname      String
-  lastname       String
+  firstName      String
+  lastName       String
   email          String   @unique
   phone          String?
   profileImage   String?
@@ -159,9 +159,12 @@ model Event {
 
 model EndUser {
   id             String  @id @default(uuid(7))
-  name           String
+  anonymousId    String  @unique
+  firstName      String
+  lastName       String
   email          String
   externalUserId String?
+  traits         Json?   // Custom properties from identify calls
 
   // Timestamps
   createdAt DateTime  @default(now())
@@ -175,9 +178,11 @@ model EndUser {
   feedbacks Feedback[]
 
   @@unique([projectId, externalUserId], name: "project_external_user_unique")
+  @@unique([projectId, anonymousId], name: "project_anonymous_id_unique")
   // Indexes
   @@index([email])
   @@index([projectId])
+  @@index([anonymousId])
   // Map
   @@map("end_users")
 }

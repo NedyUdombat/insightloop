@@ -6,8 +6,8 @@ export interface AuthenticatePayload {
 export interface RegisterPayload {
   email: string;
   password: string;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface ResetPasswordPayload {

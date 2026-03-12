@@ -33,7 +33,10 @@ export async function changePassword(data: {
 export async function getNotificationPreferences(): Promise<
   GenericResponse<NotificationPreferences>
 > {
-  return request<NotificationPreferences>("GET", "user/notification-preferences");
+  return request<NotificationPreferences>(
+    "GET",
+    "user/notification-preferences",
+  );
 }
 
 export async function updateNotificationPreferences(

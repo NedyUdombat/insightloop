@@ -17,8 +17,8 @@ import useLogoutAll from "@/queries/auth/useLogoutAll";
 interface UserAvatarDropdownProps {
   user: {
     email: string;
-    firstname?: string | null;
-    lastname?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
   };
 }
 
@@ -48,7 +48,7 @@ export default function UserAvatarDropdown({ user }: UserAvatarDropdownProps) {
           type="button"
           className="h-8 w-8 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs font-medium hover:bg-indigo-600/50 transition-colors cursor-pointer"
         >
-          {getInitialsFromName(user.email, user.firstname, user.lastname)}
+          {getInitialsFromName(user.email, user.firstName, user.lastName)}
         </button>
       </DropdownMenu.Trigger>
 

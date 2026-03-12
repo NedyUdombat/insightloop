@@ -1,21 +1,21 @@
 export function getInitialsFromName(
   email: string,
-  firstname?: string | null,
-  lastname?: string | null,
+  firstName?: string | null,
+  lastName?: string | null,
 ): string {
-  // Try to get initials from firstname and lastname
-  if (firstname && lastname) {
-    return `${firstname[0]}${lastname[0]}`.toUpperCase();
+  // Try to get initials from firstName and lastName
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
   }
 
-  // Try to get initials from firstname only
-  if (firstname) {
-    return firstname.slice(0, 2).toUpperCase();
+  // Try to get initials from firstName only
+  if (firstName) {
+    return firstName.slice(0, 2).toUpperCase();
   }
 
-  // Try to get initials from lastname only
-  if (lastname) {
-    return lastname.slice(0, 2).toUpperCase();
+  // Try to get initials from lastName only
+  if (lastName) {
+    return lastName.slice(0, 2).toUpperCase();
   }
 
   // Fallback to email

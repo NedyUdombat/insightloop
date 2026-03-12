@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const [apiKeyLimit, projectLimit] = await Promise.all([
     rateLimitService.hit({
       key: "EVENT_INGEST",
-      identifier: auth.apiKeyId,
+      identifier: auth.apiKey.id,
       maxRequests: 1000,
       windowMs: 60 * 1000, // 1 minute
     }),
@@ -54,8 +54,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { eventName, eventTimestamp, properties, anonymousId, userId } =
-    validatedData.data;
+  const {
+    eventName,
+    eventTimestamp,
+    properties,
+    anonymousId,
+    userId,
+    metadata,
+  } = validatedData.data;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -65,6 +71,9 @@ export async function POST(req: NextRequest) {
       const resolvedEndUser = await endUserService.resolveEndUser({
         projectId: auth.project.id,
         externalUserId,
+        email: "",
+        firstName: "",
+        lastName: "",
         tx,
       });
 
@@ -77,6 +86,7 @@ export async function POST(req: NextRequest) {
         projectId: auth.project.id,
         endUserId: resolvedEndUser?.id,
         environment: auth.apiKey.environment,
+        metadata: metadata || {},
         tx,
       });
     });

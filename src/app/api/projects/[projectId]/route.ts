@@ -105,13 +105,15 @@ export const PATCH = requireAuth(async (req) => {
     updateData.eventNotifications = validatedProjectData.eventNotifications;
   }
   if (validatedProjectData.feedbackNotifications !== undefined) {
-    updateData.feedbackNotifications = validatedProjectData.feedbackNotifications;
+    updateData.feedbackNotifications =
+      validatedProjectData.feedbackNotifications;
   }
   if (validatedProjectData.systemNotifications !== undefined) {
     updateData.systemNotifications = validatedProjectData.systemNotifications;
   }
   if (validatedProjectData.securityNotifications !== undefined) {
-    updateData.securityNotifications = validatedProjectData.securityNotifications;
+    updateData.securityNotifications =
+      validatedProjectData.securityNotifications;
   }
   if (validatedProjectData.autoArchive !== undefined) {
     updateData.autoArchive = validatedProjectData.autoArchive;

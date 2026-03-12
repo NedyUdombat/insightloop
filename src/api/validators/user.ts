@@ -1,9 +1,9 @@
 import * as z from "zod";
-import { NotificationChannel, DigestFrequency } from "@/generated/prisma/enums";
+import { DigestFrequency, NotificationChannel } from "@/generated/prisma/enums";
 
 export const CreateUserSchema = z.strictObject({
-  firstname: z.string().min(1, "First name is required"),
-  lastname: z.string().min(1, "Last name is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   email: z.email("Invalid email address"),
   password: z
     .string()
@@ -26,8 +26,8 @@ export const LoginSchema = z.strictObject({
 });
 
 export const UpdateUserSchema = z.strictObject({
-  firstname: z.string().min(1).optional(),
-  lastname: z.string().min(1).optional(),
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
   phone: z.string().optional().nullable(),
   profileImage: z.string().optional().nullable(),
 });

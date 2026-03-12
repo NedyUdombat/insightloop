@@ -37,8 +37,8 @@ class UserService {
   async serializeUser(user: IUser): Promise<PublicUser> {
     return {
       id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       phone: user.phone,
       profileImage: user.profileImage,

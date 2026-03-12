@@ -1,10 +1,14 @@
-import type { UserRole, NotificationChannel, DigestFrequency } from "@/generated/prisma/enums";
+import type {
+  DigestFrequency,
+  NotificationChannel,
+  UserRole,
+} from "@/generated/prisma/enums";
 import type { IModel } from "./IModel";
 import type { IProject } from "./IProject";
 
 export interface IUser extends IModel {
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string | null;
   profileImage: string | null;
@@ -33,8 +37,8 @@ export interface PublicUser {
   id: string;
   createdAt: Date;
   updatedAt: Date;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string | null;
   profileImage: string | null;
