@@ -1,18 +1,19 @@
 "use client";
 
+import * as Toast from "@radix-ui/react-toast";
 import {
   ArrowLeft,
   Camera,
+  CheckCircle2,
   Loader2,
   Save,
   X,
-  CheckCircle2,
   XCircle,
 } from "lucide-react";
-import * as Toast from "@radix-ui/react-toast";
-import { useProfileLogic } from "./useProfileLogic";
-import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import Image from "next/image";
 import { useRef, useState } from "react";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { useProfileLogic } from "./useProfileLogic";
 
 type TabType = "personal" | "security";
 
@@ -107,7 +108,7 @@ export default function ProfilePage() {
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 text-2xl font-semibold overflow-hidden">
                     {profileImage ? (
-                      <img
+                      <Image
                         src={profileImage}
                         alt="Profile"
                         className="w-full h-full object-cover"

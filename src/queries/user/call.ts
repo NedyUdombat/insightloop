@@ -1,7 +1,7 @@
 import type { PublicUser } from "@/api/types/IUser";
 import type {
-  UpdateUserInput,
   UpdateNotificationPreferencesInput,
+  UpdateUserInput,
 } from "@/api/validators/user";
 import { request } from "../helpers/request";
 

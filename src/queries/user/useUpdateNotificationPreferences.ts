@@ -3,11 +3,11 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  updateNotificationPreferences,
-  type NotificationPreferences,
-} from "./call";
 import type { UpdateNotificationPreferencesInput } from "@/api/validators/user";
+import {
+  type NotificationPreferences,
+  updateNotificationPreferences,
+} from "./call";
 
 const useUpdateNotificationPreferences = () => {
   const queryClient = useQueryClient();

@@ -1,18 +1,18 @@
 "use client";
 
+import * as Toast from "@radix-ui/react-toast";
 import {
   ArrowLeft,
   Bell,
+  Clock,
+  Loader2,
   Mail,
   Smartphone,
-  Loader2,
-  Clock,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import * as Toast from "@radix-ui/react-toast";
-import { NotificationChannel, DigestFrequency } from "@/generated/prisma/enums";
-import { useNotificationLogic } from "./useNotificationLogic";
+import { DigestFrequency, NotificationChannel } from "@/generated/prisma/enums";
 import useGetCurrentUser from "@/queries/user/useGetCurrentUser";
+import { useNotificationLogic } from "./useNotificationLogic";
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -235,10 +235,14 @@ export default function NotificationsPage() {
           </p>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="text-sm text-neutral-400 mb-2 block">
+              <label
+                htmlFor="quietHoursStart"
+                className="text-sm text-neutral-400 mb-2 block"
+              >
                 Start
               </label>
               <input
+                name="quietHoursStart"
                 type="time"
                 value={settings.quietHoursStart || ""}
                 onChange={(e) =>
@@ -252,8 +256,14 @@ export default function NotificationsPage() {
               />
             </div>
             <div className="flex-1">
-              <label className="text-sm text-neutral-400 mb-2 block">End</label>
+              <label
+                className="text-sm text-neutral-400 mb-2 block"
+                htmlFor="quietHoursEnd"
+              >
+                End
+              </label>
               <input
+                name="quietHoursEnd"
                 type="time"
                 value={settings.quietHoursEnd || ""}
                 onChange={(e) =>

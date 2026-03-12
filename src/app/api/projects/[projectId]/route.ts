@@ -3,8 +3,8 @@ import { prisma } from "@/api/lib/db";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
 import AuditService from "@/api/services/AuditService";
-import ProjectService from "@/api/services/ProjectService";
 import notificationService from "@/api/services/NotificationService";
+import ProjectService from "@/api/services/ProjectService";
 import {
   type UpdateProjectInput,
   UpdateProjectSchema,
@@ -295,7 +295,7 @@ export const DELETE = requireAuth(async (req) => {
           projectId,
           "Project Deleted",
           `Project "${projectName}" has been deleted`,
-          "WARNING" as any,
+          "WARNING",
         )
         .catch((err) =>
           console.error("Failed to create project deletion notification:", err),

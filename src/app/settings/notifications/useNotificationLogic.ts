@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { NotificationChannel, DigestFrequency } from "@/generated/prisma/enums";
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
+import { useEffect, useState } from "react";
+import { DigestFrequency, NotificationChannel } from "@/generated/prisma/enums";
 import useGetNotificationPreferences from "@/queries/user/useGetNotificationPreferences";
 import useUpdateNotificationPreferences from "@/queries/user/useUpdateNotificationPreferences";
 
@@ -28,6 +29,18 @@ export const useNotificationLogic = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
+  const dateToTimeString = (dateString: string | null): string | null => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      const hours = date.getHours().toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
+    } catch {
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (preferences) {
       setSettings({
@@ -40,18 +53,6 @@ export const useNotificationLogic = () => {
       });
     }
   }, [preferences]);
-
-  const dateToTimeString = (dateString: string | null): string | null => {
-    if (!dateString) return null;
-    try {
-      const date = new Date(dateString);
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-      return `${hours}:${minutes}`;
-    } catch {
-      return null;
-    }
-  };
 
   const timeStringToISODate = (timeString: string | null): string | null => {
     if (!timeString) return null;

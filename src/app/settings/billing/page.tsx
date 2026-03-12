@@ -2,7 +2,7 @@
 
 import { ArrowLeft, CreditCard, Download, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Invoice {
   id: string;

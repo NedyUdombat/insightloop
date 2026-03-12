@@ -8,7 +8,7 @@ export const FeedbackSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
-const JSONValue: z.ZodType<any> = z.lazy(() =>
+const JSONValue: z.ZodType<unknown> = z.lazy(() =>
   z.union([
     z.string(),
     z.number(),

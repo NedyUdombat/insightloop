@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Prisma } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
+import type { EndUser } from "@/generated/prisma/client";
 
 class EndUserService {
   async identify({
@@ -133,6 +134,64 @@ class EndUserService {
         traits: traits ?? null,
       },
     });
+  }
+
+  async findOrCreateEndUser({
+    projectId,
+    externalUserId,
+    tx,
+  }: {
+    projectId: string;
+    externalUserId: string | null;
+    tx: Prisma.TransactionClient;
+  }): Promise<EndUser> {
+    // Step 1: Find or create EndUser
+    let endUser: EndUser;
+
+    if (!externalUserId) {
+      // No userId provided - create a new anonymous EndUser
+      endUser = await tx.endUser.create({
+        data: {
+          projectId: projectId,
+          externalUserId: null,
+          anonymousId: randomUUID(),
+          email: "",
+          firstName: "",
+          lastName: "",
+          traits: {},
+        },
+      });
+    } else {
+      // Step 1a: Check if EndUser with this externalUserId already exists
+      const existingEndUser = await tx.endUser.findUnique({
+        where: {
+          project_external_user_unique: {
+            projectId: projectId,
+            externalUserId,
+          },
+        },
+      });
+
+      if (existingEndUser) {
+        // Step 1b: Use existing EndUser
+        endUser = existingEndUser;
+      } else {
+        // Step 1c: Create new EndUser with the externalUserId
+        endUser = await tx.endUser.create({
+          data: {
+            projectId: projectId,
+            externalUserId,
+            anonymousId: randomUUID(),
+            email: "",
+            firstName: "",
+            lastName: "",
+            traits: {},
+          },
+        });
+      }
+    }
+
+    return endUser;
   }
 }
 

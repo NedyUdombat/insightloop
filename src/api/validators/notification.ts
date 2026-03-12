@@ -1,8 +1,8 @@
 import * as z from "zod";
 import {
-  NotificationType,
-  NotificationStatus,
   NotificationChannel,
+  NotificationStatus,
+  NotificationType,
 } from "@/generated/prisma/enums";
 
 export const CreateNotificationSchema = z.strictObject({

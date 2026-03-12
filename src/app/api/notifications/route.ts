@@ -1,30 +1,31 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import notificationService from "@/api/services/NotificationService";
-import { NotificationStatus, NotificationType } from "@/generated/prisma/enums";
+import type {
+  NotificationStatus,
+  NotificationType,
+} from "@/generated/prisma/enums";
 
 export const GET = requireAuth(async (req) => {
   try {
+    const projectId = req.params?.projectId;
     const { searchParams } = new URL(req.url);
 
     // Extract query parameters
-    const projectId = searchParams.get("projectId") || undefined;
+    // const projectId = searchParams.get("projectId") || undefined;
     const readParam = searchParams.get("read");
     const read = readParam ? readParam === "true" : undefined;
     const type = searchParams.get("type") as NotificationType | undefined;
     const status = searchParams.get("status") as NotificationStatus | undefined;
-    const limit = searchParams.get("limit")
-      ? Number.parseInt(searchParams.get("limit")!)
-      : 50;
-    const offset = searchParams.get("offset")
-      ? Number.parseInt(searchParams.get("offset")!)
-      : 0;
-    const startDate = searchParams.get("startDate")
-      ? new Date(searchParams.get("startDate")!)
-      : undefined;
-    const endDate = searchParams.get("endDate")
-      ? new Date(searchParams.get("endDate")!)
-      : undefined;
+    const limitParam = searchParams.get("limit");
+    const offsetParam = searchParams.get("offset");
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
+
+    const limit = limitParam ? parseInt(limitParam, 10) : 50;
+    const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
+    const startDate = startDateParam ? new Date(startDateParam) : undefined;
+    const endDate = endDateParam ? new Date(endDateParam) : undefined;
 
     const result = await notificationService.getNotifications({
       userId: req.user.id,

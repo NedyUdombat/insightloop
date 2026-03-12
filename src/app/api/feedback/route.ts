@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
@@ -8,7 +7,6 @@ import FeedbackService from "@/api/services/FeedbackService";
 import notificationService from "@/api/services/NotificationService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { SDKFeedbackSchema } from "@/api/validators/feedback";
-import type { EndUser } from "@/generated/prisma/client";
 
 const MAX_PAYLOAD_BYTES = 24 * 1024; // feedback should be smaller
 
@@ -92,50 +90,11 @@ export async function POST(req: NextRequest) {
   try {
     await prisma.$transaction(async (tx) => {
       // Step 1: Find or create EndUser
-      let endUser: EndUser;
-
-      if (!externalUserId) {
-        // No userId provided - create a new anonymous EndUser
-        endUser = await tx.endUser.create({
-          data: {
-            projectId: auth.project.id,
-            externalUserId: null,
-            anonymousId: randomUUID(),
-            email: "",
-            firstName: "",
-            lastName: "",
-            traits: {},
-          },
-        });
-      } else {
-        // Step 1a: Check if EndUser with this externalUserId already exists
-        const existingEndUser = await tx.endUser.findUnique({
-          where: {
-            project_external_user_unique: {
-              projectId: auth.project.id,
-              externalUserId,
-            },
-          },
-        });
-
-        if (existingEndUser) {
-          // Step 1b: Use existing EndUser
-          endUser = existingEndUser;
-        } else {
-          // Step 1c: Create new EndUser with the externalUserId
-          endUser = await tx.endUser.create({
-            data: {
-              projectId: auth.project.id,
-              externalUserId,
-              anonymousId: randomUUID(),
-              email: "",
-              firstName: "",
-              lastName: "",
-              traits: {},
-            },
-          });
-        }
-      }
+      const endUser = await endUserService.findOrCreateEndUser({
+        projectId: auth.project.id,
+        externalUserId,
+        tx,
+      });
 
       // Step 2: Create feedback using the EndUser's id
       const createdFeedback = await feedbackService.createFeedback({

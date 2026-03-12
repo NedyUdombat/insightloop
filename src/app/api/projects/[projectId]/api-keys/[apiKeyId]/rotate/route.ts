@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/api/middleware/requireAuth";
 import { prisma } from "@/api/lib/db";
+import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
 import notificationService from "@/api/services/NotificationService";
 

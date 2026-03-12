@@ -6,7 +6,7 @@ export const EndUserSchema = z.object({
   name: z.string().max(256).optional(),
 });
 
-const JSONValue: z.ZodType<any> = z.lazy(() =>
+const JSONValue: z.ZodType<unknown> = z.lazy(() =>
   z.union([
     z.string(),
     z.number(),

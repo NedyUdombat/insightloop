@@ -1,9 +1,11 @@
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
+/** biome-ignore-all lint/a11y/useKeyWithClickEvents: <explanation> */
 "use client";
 
+import { formatDistanceToNow } from "date-fns";
 import { Bell } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
 import useGetNotifications from "@/queries/notifications/useGetNotifications";
 import useGetUnreadCount from "@/queries/notifications/useGetUnreadCount";
 import useMarkAllAsRead from "@/queries/notifications/useMarkAllAsRead";

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
-import notificationService from "@/api/services/NotificationService";
+import notificationService, {
+  type NotificationPreferences,
+} from "@/api/services/NotificationService";
 import { UpdateNotificationPreferencesSchema } from "@/api/validators/user";
 
 export const GET = requireAuth(async (req) => {
@@ -29,9 +31,9 @@ export const PATCH = requireAuth(async (req) => {
   }
 
   try {
-    const updateData: any = {
+    const updateData = {
       ...validatedData.data,
-    };
+    } as NotificationPreferences;
 
     if (validatedData.data.quietHoursStart !== undefined) {
       updateData.quietHoursStart = validatedData.data.quietHoursStart

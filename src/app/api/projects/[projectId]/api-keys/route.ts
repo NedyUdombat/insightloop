@@ -3,8 +3,8 @@ import { prisma } from "@/api/lib/db";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import ApiKeyService from "@/api/services/ApiKeyService";
 import AuditService from "@/api/services/AuditService";
-import ProjectService from "@/api/services/ProjectService";
 import notificationService from "@/api/services/NotificationService";
+import ProjectService from "@/api/services/ProjectService";
 import { CreateApiKeySchema } from "@/api/validators/project";
 
 export const POST = requireAuth(async (req) => {

@@ -1,27 +1,30 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
 import {
+  Activity,
+  AlertCircle,
   Bell,
   CheckCheck,
+  CheckSquare,
   Clock,
-  AlertCircle,
-  Activity,
+  Filter,
   MessageSquare,
   Settings as SettingsIcon,
-  Filter,
-  Trash2,
   Square,
-  CheckSquare,
+  Trash2,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import useGetNotifications from "@/queries/notifications/useGetNotifications";
-import useMarkAsRead from "@/queries/notifications/useMarkAsRead";
-import useMarkAllAsRead from "@/queries/notifications/useMarkAllAsRead";
+import { useParams } from "next/navigation";
+import { useMemo, useState } from "react";
+import type {
+  NotificationStatus,
+  NotificationType,
+} from "@/generated/prisma/enums";
 import useDeleteNotifications from "@/queries/notifications/useDeleteNotifications";
 import useDeleteReadNotifications from "@/queries/notifications/useDeleteReadNotifications";
-import { NotificationStatus, NotificationType } from "@/generated/prisma/enums";
+import useGetNotifications from "@/queries/notifications/useGetNotifications";
+import useMarkAllAsRead from "@/queries/notifications/useMarkAllAsRead";
+import useMarkAsRead from "@/queries/notifications/useMarkAsRead";
 
 type FilterType = "all" | "unread";
 type CategoryFilterType = "all" | NotificationType;
@@ -54,7 +57,7 @@ export default function NotificationsPage() {
     }
 
     return filters;
-  }, [projectId, limit, currentPage, filter, categoryFilter]);
+  }, [projectId, filter, categoryFilter, currentPage]);
 
   const {
     notifications,

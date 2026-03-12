@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAuth } from "@/api/middleware/requireAuth";
 import notificationService from "@/api/services/NotificationService";
 

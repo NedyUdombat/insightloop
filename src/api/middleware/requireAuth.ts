@@ -56,6 +56,10 @@ export function requireAuth<
       };
 
       (req as AuthenticatedRequest).params = await ctx.params;
+      console.log({
+        req: req,
+        ctxParams: await ctx.params,
+      });
 
       return handler(req as AuthenticatedRequest);
     } catch (err) {

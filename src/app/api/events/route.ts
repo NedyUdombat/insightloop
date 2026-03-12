@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
@@ -9,7 +8,6 @@ import EventService from "@/api/services/EventService";
 import notificationService from "@/api/services/NotificationService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { BatchEventSchema } from "@/api/validators/event";
-import type { EndUser } from "@/generated/prisma/client";
 import { NotificationStatus, NotificationType } from "@/generated/prisma/enums";
 
 const MAX_PAYLOAD_BYTES = 32 * 1024; // 32KB - tweak
@@ -105,50 +103,11 @@ export async function POST(req: NextRequest) {
         const externalUserId = event.userId || null;
 
         // Step 1: Find or create EndUser
-        let endUser: EndUser;
-
-        if (!externalUserId) {
-          // No userId provided - create a new anonymous EndUser
-          endUser = await tx.endUser.create({
-            data: {
-              projectId: auth.project.id,
-              externalUserId: null,
-              anonymousId: randomUUID(),
-              email: "",
-              firstName: "",
-              lastName: "",
-              traits: {},
-            },
-          });
-        } else {
-          // Step 1a: Check if EndUser with this externalUserId already exists
-          const existingEndUser = await tx.endUser.findUnique({
-            where: {
-              project_external_user_unique: {
-                projectId: auth.project.id,
-                externalUserId,
-              },
-            },
-          });
-
-          if (existingEndUser) {
-            // Step 1b: Use existing EndUser
-            endUser = existingEndUser;
-          } else {
-            // Step 1c: Create new EndUser with the externalUserId
-            endUser = await tx.endUser.create({
-              data: {
-                projectId: auth.project.id,
-                externalUserId,
-                anonymousId: randomUUID(),
-                email: "",
-                firstName: "",
-                lastName: "",
-                traits: {},
-              },
-            });
-          }
-        }
+        const endUser = await endUserService.findOrCreateEndUser({
+          projectId: auth.project.id,
+          externalUserId,
+          tx,
+        });
 
         // Parse and validate timestamp
         const timestamp = resolveEventTimestamp(event.eventTimestamp);

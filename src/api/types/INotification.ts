@@ -15,6 +15,7 @@ export interface INotification extends IModel {
   notificationChannel: NotificationChannel;
   read: boolean;
   actionUrl: string | null;
+  // biome-ignore lint/suspicious/noExplicitAny: <object>
   data: Record<string, any> | null;
   readAt: Date | null;
   userId: string;

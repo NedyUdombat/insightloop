@@ -8,7 +8,7 @@ import AuditService from "@/api/services/AuditService";
 import ProjectService from "@/api/services/ProjectService";
 import RateLimitService from "@/api/services/RateLimitService";
 import { CreateProjectSchema } from "@/api/validators/project";
-import { ApiKeyType, Environment } from "@/generated/prisma/enums";
+import { ApiKeyType } from "@/generated/prisma/enums";
 
 const DEFAULT_API_KEY_NAME = "Default";
 
