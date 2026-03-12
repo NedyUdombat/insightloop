@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/api/lib/db";
@@ -5,8 +6,11 @@ import { resolveEventTimestamp } from "@/api/lib/eventTimestamp";
 import { requireApiKey } from "@/api/middleware/requireApiKey";
 import EndUserService from "@/api/services/EndUserService";
 import EventService from "@/api/services/EventService";
+import notificationService from "@/api/services/NotificationService";
 import RateLimitService from "@/api/services/RateLimitService";
-import { EventSchema } from "@/api/validators/event";
+import { BatchEventSchema } from "@/api/validators/event";
+import type { EndUser } from "@/generated/prisma/client";
+import { NotificationStatus, NotificationType } from "@/generated/prisma/enums";
 
 const MAX_PAYLOAD_BYTES = 32 * 1024; // 32KB - tweak
 
@@ -20,22 +24,47 @@ export async function POST(req: NextRequest) {
   const endUserService = new EndUserService();
   const rateLimitService = new RateLimitService();
 
-  const [apiKeyLimit, projectLimit] = await Promise.all([
+  // Environment-specific rate limits
+  const isDevelopment = auth.apiKey.environment === "DEVELOPMENT";
+  const isStaging = auth.apiKey.environment === "STAGING";
+
+  // Development: Lower limits for testing
+  // Staging: Medium limits for pre-production testing
+  // Production: Higher limits for live traffic
+  const apiKeyMaxRequests = isDevelopment ? 1000 : isStaging ? 5000 : 10000;
+  const projectMaxRequests = isDevelopment
+    ? 5_000
+    : isStaging
+      ? 25_000
+      : 50_000;
+
+  const [apiKeyLimit, projectLimit, environmentLimit] = await Promise.all([
     rateLimitService.hit({
       key: "EVENT_INGEST",
       identifier: auth.apiKey.id,
-      maxRequests: 1000,
+      maxRequests: apiKeyMaxRequests,
       windowMs: 60 * 1000, // 1 minute
     }),
     rateLimitService.hit({
       key: "EVENT_INGEST_PROJECT",
       identifier: auth.project.id,
-      maxRequests: 50_000,
+      maxRequests: projectMaxRequests,
+      windowMs: 60 * 1000,
+    }),
+    // Per-environment rate limit
+    rateLimitService.hit({
+      key: `EVENT_INGEST_ENV_${auth.apiKey.environment}`,
+      identifier: `${auth.project.id}_${auth.apiKey.environment}`,
+      maxRequests: projectMaxRequests,
       windowMs: 60 * 1000,
     }),
   ]);
 
-  if (!apiKeyLimit.allowed || !projectLimit.allowed) {
+  if (
+    !apiKeyLimit.allowed ||
+    !projectLimit.allowed ||
+    !environmentLimit.allowed
+  ) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
@@ -46,55 +75,137 @@ export async function POST(req: NextRequest) {
   }
 
   const reqBody = await req.json();
-  const validatedData = EventSchema.safeParse(reqBody);
+
+  // Validate as batch payload (SDK format)
+  const validatedData = BatchEventSchema.safeParse(reqBody);
   if (!validatedData.success) {
+    console.error("Invalid request data:", validatedData);
     return NextResponse.json(
       { error: "Invalid request data" },
       { status: 400 },
     );
   }
 
-  const {
-    eventName,
-    eventTimestamp,
-    properties,
-    anonymousId,
-    userId,
-    metadata,
-  } = validatedData.data;
+  const { events } = validatedData.data;
+
+  // Reject empty batches
+  if (events.length === 0) {
+    return NextResponse.json(
+      { error: "Empty batch not allowed" },
+      { status: 400 },
+    );
+  }
 
   try {
     await prisma.$transaction(async (tx) => {
-      // Determine externalUserId: userId takes precedence over anonymousId
-      const externalUserId = userId || anonymousId || null;
+      const createdEventIds: { eventName: string; eventId: string }[] = [];
+      // Process each event in the batch
+      for (const event of events) {
+        // Determine externalUserId from the client's user management system
+        const externalUserId = event.userId || null;
 
-      const resolvedEndUser = await endUserService.resolveEndUser({
-        projectId: auth.project.id,
-        externalUserId,
-        email: "",
-        firstName: "",
-        lastName: "",
-        tx,
-      });
+        // Step 1: Find or create EndUser
+        let endUser: EndUser;
 
-      // Parse and validate timestamp
-      const timestamp = resolveEventTimestamp(eventTimestamp);
-      await eventService.createEvent({
-        eventName,
-        eventTimeStamp: timestamp,
-        properties: properties || {},
-        projectId: auth.project.id,
-        endUserId: resolvedEndUser?.id,
-        environment: auth.apiKey.environment,
-        metadata: metadata || {},
-        tx,
-      });
+        if (!externalUserId) {
+          // No userId provided - create a new anonymous EndUser
+          endUser = await tx.endUser.create({
+            data: {
+              projectId: auth.project.id,
+              externalUserId: null,
+              anonymousId: randomUUID(),
+              email: "",
+              firstName: "",
+              lastName: "",
+              traits: {},
+            },
+          });
+        } else {
+          // Step 1a: Check if EndUser with this externalUserId already exists
+          const existingEndUser = await tx.endUser.findUnique({
+            where: {
+              project_external_user_unique: {
+                projectId: auth.project.id,
+                externalUserId,
+              },
+            },
+          });
+
+          if (existingEndUser) {
+            // Step 1b: Use existing EndUser
+            endUser = existingEndUser;
+          } else {
+            // Step 1c: Create new EndUser with the externalUserId
+            endUser = await tx.endUser.create({
+              data: {
+                projectId: auth.project.id,
+                externalUserId,
+                anonymousId: randomUUID(),
+                email: "",
+                firstName: "",
+                lastName: "",
+                traits: {},
+              },
+            });
+          }
+        }
+
+        // Parse and validate timestamp
+        const timestamp = resolveEventTimestamp(event.eventTimestamp);
+
+        // Step 2: Create event using the EndUser's id
+        const createdEvent = await eventService.createEvent({
+          eventName: event.eventName,
+          eventTimeStamp: timestamp,
+          properties: event.properties || {},
+          projectId: auth.project.id,
+          endUserId: endUser.id,
+          environment: auth.apiKey.environment,
+          metadata: event.metadata || {},
+          externalEventId: event.id,
+          tx,
+        });
+
+        // Store event info for notifications
+        createdEventIds.push({
+          eventName: event.eventName,
+          eventId: createdEvent.id,
+        });
+
+        // Create notifications after transaction completes (if enabled)
+        if (auth.project.eventNotifications) {
+          // Use createBulk for performance with multiple notifications
+          const notificationInputs = createdEventIds.map((evt) => ({
+            userId: auth.project.ownerId,
+            projectId: auth.project.id,
+            title: "New Event Tracked",
+            message: `Event "${evt.eventName}" was tracked in your project`,
+            type: NotificationType.EVENT,
+            status: NotificationStatus.INFO,
+            actionUrl: `/dashboard/${auth.project.id}/events/${evt.eventId}`,
+            data: {
+              eventName: evt.eventName,
+              eventId: evt.eventId,
+              externalEventId: event.id,
+            },
+          }));
+
+          // Fire and forget - don't block the response
+          notificationService
+            .createBulk(notificationInputs)
+            .catch((err) =>
+              console.error("Failed to create event notifications:", err),
+            );
+        }
+      }
     });
 
-    return NextResponse.json({ success: true }, { status: 202 });
+    return NextResponse.json(
+      { success: true, eventsProcessed: events.length },
+      { status: 202 },
+    );
   } catch (err) {
-    console.error("Ingest event failed", err);
-    // If schema error or conflict, return 400; otherwise 500
+    console.error("Ingest event batch failed", err);
     return NextResponse.json({ error: "Ingestion failed" }, { status: 500 });
   }
 }

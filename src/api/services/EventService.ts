@@ -14,6 +14,7 @@ class EventService {
     endUserId,
     environment,
     metadata,
+    externalEventId,
   }: {
     projectId: string;
     eventName: string;
@@ -23,6 +24,7 @@ class EventService {
     tx?: PrismaClient;
     environment: Environment;
     metadata?: Record<string, unknown> | null;
+    externalEventId?: string;
   }) {
     const db = tx ?? prisma;
 
@@ -35,6 +37,7 @@ class EventService {
         properties,
         environment,
         metadata,
+        externalEventId,
       },
     });
   }

@@ -24,7 +24,7 @@ class EndUserService {
 
     return db.endUser.upsert({
       where: {
-        projectId_externalUserId: {
+        project_external_user_unique: {
           projectId,
           externalUserId: userId,
         },
@@ -80,7 +80,7 @@ class EndUserService {
 
     return db.endUser.upsert({
       where: {
-        projectId_externalUserId: {
+        project_external_user_unique: {
           projectId,
           externalUserId,
         },

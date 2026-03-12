@@ -192,6 +192,7 @@ async function main() {
           firstName: "Anonymous",
           lastName: "User",
           email: "anon_1@anonymous.local",
+          externalUserId: "anon_001",
           projectId: project.id,
         },
       }),
@@ -201,6 +202,7 @@ async function main() {
           firstName: "Anonymous",
           lastName: "User",
           email: "anon_2@anonymous.local",
+          externalUserId: "anon_002",
           projectId: project.id,
         },
       }),
@@ -397,6 +399,7 @@ async function main() {
             projectId: project.id,
             endUserId: endUser.id,
             environment: env as Environment,
+            externalEventId: crypto.randomUUID(),
             properties: event.props,
             metadata: {
               browser: ["Chrome", "Firefox", "Safari", "Edge"][userIndex % 4],
@@ -488,6 +491,7 @@ async function main() {
         projectId: project.id,
         endUserId: endUsers[userIndex].id,
         environment: envs[i % 5],
+        externalEventId: crypto.randomUUID(),
         properties: {
           search_query: "wireless headphones",
           results_count: 42,

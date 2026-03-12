@@ -22,11 +22,6 @@ const useProjectSettingsLogic = () => {
   const { project, projectId, projects, isSingleProjectPending } = useProject();
   const router = useRouter();
 
-  console.log({
-    isSingleProjectPending,
-    project,
-  });
-
   // Form state
   const [projectName, setProjectName] = useState(project?.name || "");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -89,11 +84,6 @@ const useProjectSettingsLogic = () => {
     }
 
     setError(null);
-    console.log({
-      projectId,
-      name: projectName,
-      preferences,
-    });
 
     updateProjectMutation(
       {

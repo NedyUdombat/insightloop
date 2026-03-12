@@ -11,6 +11,7 @@ export interface IEvent extends IModel {
   endUserId: string;
   endUser?: IEndUser | null;
   environment: Environment;
+  externalEventId: string;
 }
 
 export interface PublicEvent {
@@ -24,4 +25,5 @@ export interface PublicEvent {
   endUser: IEndUser | null;
   environment: Environment;
   createdAt: Date;
+  externalEventId: string;
 }

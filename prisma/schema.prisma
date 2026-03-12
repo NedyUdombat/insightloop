@@ -130,11 +130,12 @@ model Feature {
 }
 
 model Event {
-  id          String      @id @default(uuid(7))
-  eventName   String
-  properties  Json // Developer-provided custom properties
-  metadata    Json // System-generated metadata (location, device, IP, host, URL, etc.)
-  environment Environment
+  id              String      @id @default(uuid(7))
+  eventName       String
+  properties      Json // Developer-provided custom properties
+  metadata        Json // System-generated metadata (location, device, IP, host, URL, etc.)
+  environment     Environment
+  externalEventId String
 
   // Timestamps
   createdAt      DateTime  @default(now())
@@ -164,7 +165,7 @@ model EndUser {
   lastName       String
   email          String
   externalUserId String?
-  traits         Json?   // Custom properties from identify calls
+  traits         Json? // Custom properties from identify calls
 
   // Timestamps
   createdAt DateTime  @default(now())

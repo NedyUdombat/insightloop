@@ -6,23 +6,24 @@ export const EndUserSchema = z.object({
   name: z.string().max(256).optional(),
 });
 
+const JSONValue: z.ZodType<any> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(JSONValue),
+    z.record(z.string(), JSONValue),
+  ]),
+);
+
 export const EventSchema = z.strictObject({
   id: z.string().optional(), // SDK-generated event ID for deduplication
   eventName: z.string().trim().max(100).min(3),
-  eventTimestamp: z.date().optional(), // ISO string from SDK
+  eventTimestamp: z.string(), // ISO string from SDK
   userId: z.string().optional().nullable(), // SDK field name
-  properties: z
-    .record(
-      z.string(),
-      z.union([z.string(), z.number(), z.boolean(), z.null()]),
-    )
-    .optional(),
-  metadata: z
-    .record(
-      z.string(),
-      z.union([z.string(), z.number(), z.boolean(), z.null()]),
-    )
-    .optional(),
+  properties: z.record(z.string(), JSONValue).optional(),
+  metadata: z.record(z.string(), JSONValue).optional(),
 });
 
 // Batch event schema to support SDK batching
