@@ -112,6 +112,9 @@ export default function ProfilePage() {
                         src={profileImage}
                         alt="Profile"
                         className="w-full h-full object-cover"
+                        width={96}
+                        height={96}
+                        unoptimized
                       />
                     ) : (
                       <span>

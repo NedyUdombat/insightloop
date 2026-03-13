@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useSidebar } from "@/contexts/SidebarContext";
 import useSidebarLogic from "./logic";
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";
@@ -12,7 +12,7 @@ const ProjectSwitcher = dynamic(() => import("./ProjectSwitcher"), {
 });
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useSidebar();
 
   const { projects, project } = useSidebarLogic();
 

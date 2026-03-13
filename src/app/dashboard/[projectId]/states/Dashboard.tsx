@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { ChevronRight, MessageSquare, Zap } from "lucide-react";
+import { Environment } from "@/generated/prisma/enums";
 import EnvironmentPill from "../events/EnvironmentPill";
 import { useProject } from "../ProjectContext";
 
@@ -42,9 +43,12 @@ export default function Dashboard() {
               <h1 className="text-3xl font-semibold tracking-tight">
                 {projectName}
               </h1>
-              <span className="rounded-full border border-indigo-800 bg-indigo-950/40 px-2.5 py-0.5 text-xs font-medium text-indigo-300">
-                Live
-              </span>
+              {project?.defaultEnvironment &&
+                project.defaultEnvironment === Environment.PRODUCTION && (
+                  <span className="rounded-full border border-indigo-800 bg-indigo-950/40 px-2.5 py-0.5 text-xs font-medium text-indigo-300">
+                    Live
+                  </span>
+                )}
             </div>
             <p className="mt-2 text-sm text-neutral-400">
               Events are flowing into InsightLoop.
@@ -78,7 +82,7 @@ export default function Dashboard() {
         </div>
 
         {/* Accent Divider */}
-        <div className="h-px bg-gradient-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0" />
+        <div className="h-px bg-linear-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0" />
 
         {/* Recent Events Section */}
         <div className="space-y-4">
@@ -102,7 +106,7 @@ export default function Dashboard() {
                   >
                     <div className="flex gap-3 flex-1 min-w-0">
                       {/* Icon */}
-                      <div className="flex-shrink-0 mt-0.5">
+                      <div className="shrink-0 mt-0.5">
                         {activity.type === "event" ? (
                           <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
                             <Zap className="w-4 h-4 text-indigo-400" />
@@ -136,7 +140,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Timestamp */}
-                    <span className="text-xs text-neutral-400 whitespace-nowrap flex-shrink-0">
+                    <span className="text-xs text-neutral-400 whitespace-nowrap shrink-0">
                       {formatDistanceToNow(new Date(activity.timestamp), {
                         addSuffix: true,
                       })}
@@ -172,7 +176,7 @@ function AccentStat({
       rounded-xl
       border
       border-neutral-800
-      bg-gradient-to-br
+      bg-linear-to-br
       from-neutral-900
       to-neutral-950
       p-6
