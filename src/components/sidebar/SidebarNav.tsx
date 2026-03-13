@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Settings,
+  Users,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { NavItem } from "./NavItem";
@@ -44,6 +45,15 @@ export function SidebarNav({
         collapsed={collapsed}
         disabled={!hasProject}
         disabledReason="Available after first event"
+      />
+
+      <NavItem
+        icon={Users}
+        label="End Users"
+        href={`/dashboard/${currentProjectId}/end-users`}
+        collapsed={collapsed}
+        disabled={!hasProject}
+        disabledReason="Create a project first"
       />
 
       <NavItem

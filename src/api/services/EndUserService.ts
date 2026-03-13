@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import type { Prisma } from "@prisma/client/extension";
 import { prisma } from "@/api/lib/db";
 import type { EndUser } from "@/generated/prisma/client";
+import type { EndUserWhereInput } from "@/generated/prisma/models/EndUser";
+import type { IEndUser } from "../types/IEndUser";
 
 class EndUserService {
   async identify({
@@ -192,6 +194,82 @@ class EndUserService {
     }
 
     return endUser;
+  }
+
+  async getEndUsers({
+    projectId,
+    page = 1,
+    limit = 25,
+    search,
+  }: {
+    projectId: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) {
+    const skip = (page - 1) * limit;
+
+    const whereClause: EndUserWhereInput = {
+      projectId,
+      deletedAt: null,
+    };
+
+    if (search) {
+      whereClause.OR = [
+        { email: { contains: search, mode: "insensitive" } },
+        { firstName: { contains: search, mode: "insensitive" } },
+        { lastName: { contains: search, mode: "insensitive" } },
+        { externalUserId: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const [endUsers, total] = await Promise.all([
+      prisma.endUser.findMany({
+        where: whereClause,
+        skip,
+        take: limit + 1,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          anonymousId: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          externalUserId: true,
+          traits: true,
+          createdAt: true,
+          updatedAt: true,
+          projectId: true,
+        },
+      }),
+      prisma.endUser.count({ where: whereClause }),
+    ]);
+
+    const hasMore = endUsers.length > limit;
+    const items = hasMore ? endUsers.slice(0, limit) : endUsers;
+
+    return {
+      endUsers: items as IEndUser[],
+      total,
+      hasMore,
+      page,
+      limit,
+    };
+  }
+
+  serializeEndUser(endUser: IEndUser) {
+    return {
+      id: endUser.id,
+      anonymousId: endUser.anonymousId,
+      firstName: endUser.firstName,
+      lastName: endUser.lastName,
+      email: endUser.email,
+      externalUserId: endUser.externalUserId,
+      traits: endUser.traits,
+      projectId: endUser.projectId,
+      createdAt: endUser.createdAt.toISOString(),
+      updatedAt: endUser.updatedAt.toISOString(),
+    };
   }
 }
 

@@ -11,3 +11,4 @@ export interface IEndUser extends IModel {
   traits?: Record<string, any> | null;
   anonymousId: string;
 }
+

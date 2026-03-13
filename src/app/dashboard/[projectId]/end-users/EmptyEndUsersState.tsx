@@ -1,40 +1,40 @@
+"use client";
 import EmptyState from "@/components/EmptyState";
 import { useProject } from "../ProjectContext";
 
-export default function EmptyFeedbackState() {
+export default function EmptyEndUsersState() {
   const { project } = useProject();
   const apiKey = project?.apiKeys[0]?.keyValue || "N/A";
   const apiKeyHint = project?.apiKeys[0]?.keyHint || "N/A";
 
   return (
     <EmptyState
-      title="No feedback yet"
-      description="We haven't received any feedback from your users yet. Once users start submitting feedback through your app, you'll see it here."
-      topIcon="💬"
+      title=" No End Users Yet"
+      description="End users will appear here once you identify them using the SDK."
+      topIcon="🚀"
       steps={[
         {
           title: "Install the SDK",
-          description: "Add InsightLoop to your app if you haven't already.",
+          description: "Add InsightLoop to your app.",
         },
         {
           title: "Initialize with your API key",
           description: "Use the key generated during onboarding.",
         },
         {
-          title: "Integrate feedback collection",
-          description: "Add feedback forms or widgets to collect user input.",
+          title: "Identify your first end user",
+          description: "Identify a user after creation to manage end-user",
         },
       ]}
       quickStart={{
         apiKey,
         apiKeyHint,
-        code: `// Send feedback
-insightloop.feedback({
-  text: "Great feature!",
-  rating: 5,
-  properties: {
-    featureId: "feature-123"
-  }
+        code: `// Track an event
+insightloop.identify({
+  userId: "user_123",
+  email: "user@example.com",
+  firstName: "John",
+  lastName: "Doe"
 });`,
       }}
       actions={
@@ -45,7 +45,7 @@ insightloop.feedback({
           Continue setup →
         </a>
       }
-      footerText="Feedback helps you understand user sentiment and improve your product."
+      footerText="Most integrations take less than 5 minutes."
     />
   );
 }
